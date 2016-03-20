@@ -1,0 +1,243 @@
+{% extends "template.html" %}
+
+{% block meta %}
+
+<script>
+  var getJSON = function(url, callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("get", url, true);
+      xhr.responseType = "json";
+      xhr.onload = function() {
+        var status = xhr.status;
+        if (status == 200) {
+          callback(null, xhr.response);
+        } else {
+          callback(status);
+        }
+      };
+      xhr.send();
+  }
+</script>
+
+<script type="text/javascript">
+
+
+
+function pubMessage() {
+	console.log("strart message");
+    var linearX = 0.0;
+    var angularZ = 0.0;
+
+    // Set the appropriate values on the message object
+    MountMessage.name = "mount";
+    MountMessage.type = "Slew";
+    MountMessage.data = "{'ra':120, 'dec':5}"
+
+    // Publish the message 
+	console.log(MountMessage);
+	console.log(MountControl);
+    var ble = MountControl.publish(MountMessage);
+	console.log(ble);
+};
+
+function Slew() {
+    // Set the appropriate values on the message object
+    MountMessage.name = "mount";
+    MountMessage.type = "Slew";
+    var radec = null
+    //console.log(radec)
+    //MountMessage.data = "{'ra':"+document.getElementById("MountControlAlt").value+", 'dec':"+document.getElementById("MountControlAz").value+"}"
+    var URL = "/processing?coord={'typ':'AltAz2RaDec','alt':"+document.getElementById("MountControlAlt").value+", 'az':"+document.getElementById("MountControlAz").value+"}"
+    console.log(URL)
+    getJSON(URL,
+    function(err, data) {
+      console.log(err)
+      console.log(data)
+      radec = data
+      console.log(radec)
+      MountMessage.data = "{'ra':"+radec.ra+", 'dec':"+radec.dec+"}"
+      MountControl.publish(MountMessage);
+    });
+}
+</script>
+<script src="/jquery-1.10.0.min.js"></script>
+<script src="/virtualsky-0.6.2.min.js"></script>
+<script type="text/javascript">
+<!--
+    $(document).ready(function(){
+        planetarium = $.virtualsky({
+                    id:'planetarium',
+                    projection:'polar', 
+                    mouse: false,
+                    keyboard: false, 
+                    az: 0, 
+                    constellations: true,
+                    meteorshowers: true,
+                    ecliptic: true,
+                    live: true,
+                    meridian: true,
+                    negative: true,
+                    latitude: 48.987154,
+                    longitude: 14.467947
+
+                  });
+
+        planetariumControl = $.virtualsky({
+                    id:'planetariumControl',
+                    projection:'stereo', 
+                    mouse: true,
+                    keyboard: true, 
+                    az: 0, 
+                    showstarlabels: true,
+                    constellations: true,
+                    meteorshowers: true,
+                    ecliptic: true,
+                    live: true,
+                    meridian: true,
+                    horizont: true,
+                    latitude: 48.987154,
+                    longitude: 14.467947
+
+                  });
+    });
+// -->
+</script>
+
+{% end %}{% block container %}
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
+  <li><a data-toggle="tab" href="#menu1">Menu 1</a></li>
+  <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
+</ul>
+<div class="tab-content">
+<!--   PRVNÍ ZÁLOŽKA -->
+  <div id="home" class="tab-pane fade in active">
+
+
+blabalba
+<div id="nodes"></div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Mount status</div>
+  <div class="panel-body">
+    <div id="row">
+      <div class="col-sm-6">
+        <div id="row">
+            <div class="form-group col-sm-6">
+                <label>RA</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>DEC</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>ALT</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>AZ</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>Axis 1</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Ticks</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>Axis 2</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Ticks</span>
+                </div>
+            </div>
+
+        </div>
+      </div>
+    <div id="planetarium" style="height:400px;" class="col-sm-6"></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Actual map</div>
+  <div class="panel-body" style="padding: 0px;">
+<div id="planetariumControl" style="width:100%;height:800px;"></div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Mount control</div>
+  <div class="panel-body" style="padding: 0px;">
+    <div id="row">
+        <div class="col-sm-6">
+          <div id="row">
+            <div class="form-group col-sm-6">
+                <label>ALT</label>
+                <div class="input-group">
+                  <input id="MountControlAlt" type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+            <div class="form-group col-sm-6">
+                <label>AZ</label>
+                <div class="input-group">
+                  <input id="MountControlAz" type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+            <button class="btn col-sm-12 btn-primary" onclick="Slew()">Slew</button>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div id="row">
+          
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+
+
+	<button id="sendMsg" type="button" onclick="pubMessage()">Publish Message</button>
+
+  </div>
+	<div id="feedback"></div>
+
+
+<!--   DRUHÁ ZÁLOŽKA -->
+  </div> <div id="menu1" class="tab-pane fade">
+    <h3>Menu 1</h3>
+    <p>Some content in menu 1.</p>
+
+
+  </div> <div id="menu2" class="tab-pane fade">
+    <h3>Menu 2</h3>
+    <p>Some content in menu 2.</p>
+  </div>
+</div>
+
+
+
+
+{% end %}

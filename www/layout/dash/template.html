@@ -6,15 +6,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/bootstrap.min.css" rel="stylesheet">
     <link href="dashboard.css" rel="stylesheet">
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.js"></script>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.js"></script>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/core_ROS.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
+    <script type="text/javascript">
+      var ros = new ROSLIB.Ros({
+          //url : 'ws://telescopeC.local:9090'
+          url : 'ws://192.168.1.111:9090'
+      }); 
+
+      ros.on('connection', function() {
+           var fbDiv = document.getElementById('feedback');
+           fbDiv.innerHTML += "<p>Connected to websocket server.</p>";
+      });
+
+      ros.on('error', function(error) {
+          var fbDiv = document.getElementById('feedback');
+          fbDiv.innerHTML += "<p>Error connecting to websocket server.</p>";
+      });
+
+      ros.on('close', function() {
+          var fbDiv = document.getElementById('feedback');
+          fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
+      });
+
+      var MountControl = new ROSLIB.Topic({
+          ros : ros,
+          name : '/arom/mount',
+          messageType : 'arom/DriverControlm'    // tohle se zjisti v ''rostopic info ''
+      });
+
+      var MountMessage = new ROSLIB.Message({   //rosmsg show arom/DriverControlm
+          name : "",
+          type : "",
+          data : "",
+          validate : "",
+          check : ""
+      });
+      
+      ros.getNodes(function(params) {
+          var i = 0;
+          var len = params.length;
+          var nodes = []
+          for (; i < len; i++) { 
+            if (params[i].indexOf("AROM") > -1){
+              nodes.push(params[i]);
+            }
+          }
+          console.log(nodes);
+       });
+
+    </script>
+
     {% block meta %}{% end %}
   </head>
   <body>
-    {% block container %} {% end %}
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -32,19 +84,35 @@
 
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-          <ul class="nav nav-sidebar">
-            {% for menu_item in [["Vec 1", "#", True], ["Vec 2", "#", False], ["Vec 3", "#", False],]%}
-              <li {% if menu_item[2] %}class="active"{% end %} ><a href="{{menu_item[1]}}">{{menu_item[0]}}</a></li>
+        <div class="col-sm-2 col-md-2 sidebar">
+          <ul class="nav nav-sidebar" id="leftmenu">
+            {% for menu_item in leftmenu %}
+              <li {% if menu_item[1] == actual %}class="active"{% end %} ><a href="{{menu_item[1]}}">{{menu_item[0]}}</a></li>
             {% end %}
           </ul>
         </div>
-        blablabla
-        <h2>nadpis 2 treba :)</h2>
+        <div class="col-sm-10 col-sm-offset-2 main">
+          <div class="row">
+            {% block container %} {% end %}
+          </div>
+        </div>
       </div>
     </div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="/bootstrap.min.js"></script>
+    <script src="/bootstrap.min.js" type="text/html"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        var lmenu=document.getElementById("leftmenu");
+        var i = 0;
+        var len = nodes.length;
+        for (; i < len; i++) { 
+          console.log(nodes[i]);
+          lmenu.innerHTML += ("<li><a href="+nodes[i]+">"+nodes[i]+"</a></li>")
+        }
+        console.log(nodes);
+      })
+
+
+    </script>
   </body>
 </html>
