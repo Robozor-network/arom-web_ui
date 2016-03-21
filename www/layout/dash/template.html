@@ -49,11 +49,11 @@
           validate : "",
           check : ""
       });
+      var nodes = []
       
       ros.getNodes(function(params) {
           var i = 0;
           var len = params.length;
-          var nodes = []
           for (; i < len; i++) { 
             if (params[i].indexOf("AROM") > -1){
               nodes.push(params[i]);
@@ -61,6 +61,7 @@
           }
           console.log(nodes);
        });
+      console.log(nodes);
 
     </script>
 
@@ -100,19 +101,5 @@
     </div>
 
     <script src="/bootstrap.min.js" type="text/html"></script>
-    <script type="text/javascript">
-      $(document).ready(function(){
-        var lmenu=document.getElementById("leftmenu");
-        var i = 0;
-        var len = nodes.length;
-        for (; i < len; i++) { 
-          console.log(nodes[i]);
-          lmenu.innerHTML += ("<li><a href="+nodes[i]+">"+nodes[i]+"</a></li>")
-        }
-        console.log(nodes);
-      })
-
-
-    </script>
   </body>
 </html>

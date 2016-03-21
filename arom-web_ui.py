@@ -34,19 +34,19 @@ class Overview(web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, addres=None):
         print "web", addres
-        self.render("www/layout/dash/publicOverview.html", title = "MyTitle", leftmenu = leftmenu, actual = '#')
+        self.render("www/layout/dash/publicOverview.html", title = "AROM", leftmenu = leftmenu, actual = '#')
 
 class Mount(web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, addres=None):
         print "web", addres
-        self.render("www/layout/dash/mount.html", title = "MyTitle | mount", leftmenu = leftmenu, actual = 'mount')
+        self.render("www/layout/dash/mount.html", title = "AROM control center | mount", leftmenu = leftmenu, actual = 'mount')
 
 class Observatory(web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, addres=None):
         print "web", addres
-        self.render("www/layout/dash/observatory.html", title = "MyTitle | observatory", leftmenu = leftmenu, actual = 'observatory')
+        self.render("www/layout/dash/observatory.html", title = "AROM control center | observatory", leftmenu = leftmenu, actual = 'observatory')
 
 class processing(web.RequestHandler):
     #@tornado.web.asynchronous

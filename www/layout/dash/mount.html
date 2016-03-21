@@ -40,25 +40,93 @@ function pubMessage() {
 	console.log(ble);
 };
 
+var GoToMethod = 'AltAz';
+
+function ToggleGoToMethod(method) {
+ GoToMethod = method;
+ console.log("method toggle to:" + GoToMethod)
+ switch(GoToMethod){
+    case 'AltAz':
+      document.getElementById("mount_btn_control_radec").className = "btn col-sm-3";
+      document.getElementById("mount_btn_control_hadec").className = "btn disabled col-sm-3";
+      document.getElementById("mount_btn_control_altaz").className = "btn btn-primary col-sm-3";
+      document.getElementById("mount_btn_control_axis").className = "btn disabled col-sm-3";
+      document.getElementById("MountControlAlt_label").innerHTML = "Altitude";
+      document.getElementById("MountControlAz_label").innerHTML = "Azimuth";
+      break;
+    case 'RaDec':
+      document.getElementById("mount_btn_control_radec").className = "btn btn-primary col-sm-3";
+      document.getElementById("mount_btn_control_hadec").className = "btn disabled col-sm-3";
+      document.getElementById("mount_btn_control_altaz").className = "btn col-sm-3";
+      document.getElementById("mount_btn_control_axis").className = "btn disabled col-sm-3";
+      document.getElementById("MountControlAlt_label").innerHTML = "Right ascension";
+      document.getElementById("MountControlAz_label").innerHTML = "Declination";
+      break;
+    case 'HaDec':
+      document.getElementById("mount_btn_control_radec").className = "btn col-sm-3";
+      document.getElementById("mount_btn_control_hadec").className = "btn btn-primary col-sm-3";
+      document.getElementById("mount_btn_control_altaz").className = "btn disabled col-sm-3";
+      document.getElementById("mount_btn_control_axis").className = "btn disabled col-sm-3";
+      document.getElementById("MountControlAlt_label").innerHTML = "Hour angle";
+      document.getElementById("MountControlAz_label").innerHTML = "Declination";
+      break;
+    case 'Axis':
+      document.getElementById("mount_btn_control_radec").className = "btn col-sm-3";
+      document.getElementById("mount_btn_control_hadec").className = "btn disabled col-sm-3";
+      document.getElementById("mount_btn_control_altaz").className = "btn col-sm-3";
+      document.getElementById("mount_btn_control_axis").className = "btn disabled col-sm-3";
+      document.getElementById("MountControlAlt_label").innerHTML = "Axis 1";
+      document.getElementById("MountControlAz_label").innerHTML = "Axis 2";
+      break;
+    default:
+      document.getElementById("mount_btn_control_radec").className = "btn";
+      document.getElementById("mount_btn_control_altaz").className = "btn";
+      document.getElementById("mount_btn_control_axis").className = "btn disabled";
+      break;
+
+ }
+}
+
 function Slew() {
     // Set the appropriate values on the message object
-    MountMessage.name = "mount";
-    MountMessage.type = "Slew";
-    var radec = null
-    //console.log(radec)
-    //MountMessage.data = "{'ra':"+document.getElementById("MountControlAlt").value+", 'dec':"+document.getElementById("MountControlAz").value+"}"
-    var URL = "/processing?coord={'typ':'AltAz2RaDec','alt':"+document.getElementById("MountControlAlt").value+", 'az':"+document.getElementById("MountControlAz").value+"}"
-    console.log(URL)
-    getJSON(URL,
-    function(err, data) {
-      console.log(err)
-      console.log(data)
-      radec = data
-      console.log(radec)
-      MountMessage.data = "{'ra':"+radec.ra+", 'dec':"+radec.dec+"}"
-      MountControl.publish(MountMessage);
-    });
+    console.log("Je vybrána metoda: "+GoToMethod)
+    switch (GoToMethod) {
+        case 'AltAz':
+            MountMessage.name = "mount";
+            MountMessage.type = "Slew";
+            var radec = null
+            var URL = "/processing?coord={'typ':'AltAz2RaDec','alt':"+document.getElementById("MountControlAlt").value+", 'az':"+document.getElementById("MountControlAz").value+"}"
+            console.log(URL)
+            getJSON(URL,
+            function(err, data) {
+              console.log(err)
+              console.log(data)
+              radec = data
+              console.log(radec)
+              MountMessage.data = "{'ra':"+radec.ra+", 'dec':"+radec.dec+"}"
+              MountControl.publish(MountMessage);
+            });
+            break; 
+        case 'RaDec':
+            MountMessage.name = "mount";
+            MountMessage.type = "Slew";
+            MountMessage.data = "{'ra':"+document.getElementById("MountControlAlt").value+", 'dec':"+document.getElementById("MountControlAz").value+"}"
+            MountControl.publish(MountMessage);
+            break; 
+        case 'Axis':
+            alert("metoda 'Axis' zatím není implementována")
+            break; 
+        default:         
+            break; 
+    }
+
+    
 }
+
+
+
+
+
 </script>
 <script src="/jquery-1.10.0.min.js"></script>
 <script src="/virtualsky-0.6.2.min.js"></script>
@@ -102,6 +170,11 @@ function Slew() {
     });
 // -->
 </script>
+<script type="text/javascript">
+
+  
+
+</script>
 
 {% end %}{% block container %}
 <ul class="nav nav-tabs">
@@ -113,8 +186,6 @@ function Slew() {
 <!--   PRVNÍ ZÁLOŽKA -->
   <div id="home" class="tab-pane fade in active">
 
-
-blabalba
 <div id="nodes"></div>
 
 <div class="panel panel-default">
@@ -187,30 +258,36 @@ blabalba
 
 <div class="panel panel-default">
   <div class="panel-heading">Mount control</div>
-  <div class="panel-body" style="padding: 0px;">
+  <div class="panel-body">
     <div id="row">
         <div class="col-sm-6">
           <div id="row">
+            <div class="btn-group col-sm-12">
+              <button type="button" id="mount_btn_control_radec" class="btn col-sm-3" onclick="ToggleGoToMethod('RaDec')">Ra/Dec</button>
+              <button type="button" id="mount_btn_control_hadec" class="btn col-sm-3" onclick="ToggleGoToMethod('HaDec')">Ha/Dec</button>
+              <button type="button" id="mount_btn_control_altaz" class="btn btn-primary col-sm-3" onclick="ToggleGoToMethod('AltAz')">Alt/Az</button>
+              <button type="button" id="mount_btn_control_axis" class="btn disabled col-sm-3" onclick="ToggleGoToMethod('Axis')">Axis 1/ Axis 2</button>
+            </div>
             <div class="form-group col-sm-6">
-                <label>ALT</label>
+                <label id="MountControlAlt_label">ALT</label>
                 <div class="input-group">
                   <input id="MountControlAlt" type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
                   <span class="input-group-addon">Deg</span>
                 </div>
             </div>
             <div class="form-group col-sm-6">
-                <label>AZ</label>
+                <label id="MountControlAz_label">AZ</label>
                 <div class="input-group">
                   <input id="MountControlAz" type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
                   <span class="input-group-addon">Deg</span>
                 </div>
             </div>
-            <button class="btn col-sm-12 btn-primary" onclick="Slew()">Slew</button>
+            <button class="btn col-sm-12 btn-primary" type="submit" onclick="Slew()">Slew</button>
           </div>
         </div>
         <div class="col-sm-6">
           <div id="row">
-          
+
           </div>
         </div>
       </div>
