@@ -9,7 +9,9 @@
     <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.js"></script>
     <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.js"></script>
     <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/core_ROS.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -17,8 +19,8 @@
 
     <script type="text/javascript">
       var ros = new ROSLIB.Ros({
-          //url : 'ws://telescopeC.local:9090'
-          url : 'ws://192.168.1.111:9090'
+          url : 'ws://telescopeC.local:9090'
+          //url : 'ws://192.168.1.111:9090'
       }); 
 
       ros.on('connection', function() {
@@ -67,11 +69,11 @@
 
     {% block meta %}{% end %}
   </head>
-  <body>
+  <body data-spy="scroll" data-target=".navbar" data-offset="50">
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
-          <a class="navbar-brand" href="#">{{title}}</a>
+          <a class="navbar-brand" href="/">{{title}}</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">

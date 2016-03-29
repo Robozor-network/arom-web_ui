@@ -21,6 +21,7 @@ from astropy.coordinates import EarthLocation
 from astropy.coordinates import AltAz
 from astropy.time import Time
 import rosapi
+import MySQLdb as mdb
 
 #print rosapi.get_nodes()
 
@@ -30,23 +31,50 @@ leftmenu = [["observatory", "observatory"],["Vec 1", "#"], ["Vec 2", "#"], ["Vec
 leftmenu = [["observatory", "observatory"],["Vec 1", "#"], ["Vec 2", "#"], ["Vec 3", "#"], ["Mount", "mount"]]
 
 
+def _sql(query, read=False):
+        print "#>", query
+        connection = mdb.connect(host="localhost", user="root", passwd="root", db="AROM", use_unicode=True, charset="utf8")
+        cursorobj = connection.cursor()
+        result = None
+        try:
+                cursorobj.execute(query)
+                result = cursorobj.fetchall()
+                if not read:
+                    connection.commit()
+        except Exception, e:
+                print "Err", e
+        connection.close()
+        return result
+
+
 class Overview(web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, addres=None):
         print "web", addres
-        self.render("www/layout/dash/publicOverview.html", title = "AROM", leftmenu = leftmenu, actual = '#')
+        self.render("www/layout/dash/publicOverview.html", title = "AROM", leftmenu = leftmenu, actual = '#', _sql=_sql)
 
 class Mount(web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, addres=None):
         print "web", addres
-        self.render("www/layout/dash/mount.html", title = "AROM control center | mount", leftmenu = leftmenu, actual = 'mount')
+        self.render("www/layout/dash/mount.html", title = "AROM control center | mount", leftmenu = leftmenu, actual = 'mount', _sql=_sql)
 
 class Observatory(web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, addres=None):
         print "web", addres
-        self.render("www/layout/dash/observatory.html", title = "AROM control center | observatory", leftmenu = leftmenu, actual = 'observatory')
+        self.render("www/layout/dash/observatory.html", title = "AROM control center | observatory", leftmenu = leftmenu, actual = 'observatory', _sql=_sql)
+
+class Obs_weather_datatable(web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self, addres=None):
+        data = _sql('SELECT id, date, sensors_id, value FROM weather WHERE (date > %f)  GROUP BY sensors_id ORDER BY date DESC;' %(Time.now().unix-60))
+        print data
+        string = ""
+        for row in data:
+            string += repr(row)+'<br>'
+        self.finish(string)
+
 
 class processing(web.RequestHandler):
     #@tornado.web.asynchronous
@@ -81,6 +109,7 @@ app = web.Application([
         (r'/', Overview),
         (r'/index', Overview),
         (r'/mount', Mount),
+        (r'/observatory/weather/datatable', Obs_weather_datatable),
         (r'/observatory', Observatory),
         (r'/obs', Observatory),
         (r'/processing', processing),
@@ -91,8 +120,10 @@ app = web.Application([
        # (r'/realtime', RTbolidozor),
        
         (r'/(favicon.ico)', web.StaticFileHandler, {'path': '.www/media/favicon.ico'}),
+        (r'/fonts/(.*)', tornado.web.StaticFileHandler,{"path": './www/fonts/' }),
         (r"/(.*\.png)", tornado.web.StaticFileHandler,{"path": './www/media/' }),
         (r"/(.*\.jpg)", tornado.web.StaticFileHandler,{"path": './www/media/' }),
+        (r"/(.*\.woff2)", tornado.web.StaticFileHandler,{"path": './www/fonts/' }),
         (r"/(.*\.css)", tornado.web.StaticFileHandler,{"path": './www/css/' }),
         (r"/(.*\.wav)", tornado.web.StaticFileHandler,{"path": './www/wav/' }),
         (r"/(.*\.json)", tornado.web.StaticFileHandler,{"path": './www/json/' }),

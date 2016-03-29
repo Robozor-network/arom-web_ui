@@ -119,13 +119,55 @@ function Slew() {
         default:         
             break; 
     }
-
-    
 }
 
 
+/*
+var ParamServer = new ros.Param({
+  mount: 'heq5/location'
+});
 
+// Fetches and returns the param value in the callback. 
 
+ParamServer.get(function(value) {
+  console.log('Value of ' + ParamServer.mount + ' is ' + value);
+});
+
+var interval = setInterval(function() {
+ParamServer.get(function(value) {
+  console.log('Value of ' + ParamServer.mount + ' is ' + value);
+});
+}, 1000);*/
+/*
+var MountLocationUpdate = new ros.Topic({
+  ros : ros,
+  name        : '/arom/mount/location',
+  messageType : 'std_msgs/String'
+});
+
+console.log(MountLocationUpdate);
+
+MountLocationUpdate.subscribe(function(message) {
+  console.log('Received message ' + listener.name + ': ' + message);
+}); */
+
+  // Subscribing to a Topic
+  // ----------------------
+
+  var listener = new ROSLIB.Topic({
+    ros : ros,
+    name : '/arom/mount/location',
+    messageType : 'std_msgs/String'
+  });
+
+  listener.subscribe(function(message) {
+    var data =  message.data.split(';');
+    console.log('Received message on ' + listener.name + ': ' + message.data);
+    document.getElementById('_ra-position').value = data[0];
+    document.getElementById('_dec-position').value = data[1];
+    document.getElementById('_alt-position').value = data[2];
+    document.getElementById('_az-position').value = data[3];
+  });
 
 </script>
 <script src="/jquery-1.10.0.min.js"></script>
@@ -178,9 +220,9 @@ function Slew() {
 
 {% end %}{% block container %}
 <ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
-  <li><a data-toggle="tab" href="#menu1">Menu 1</a></li>
-  <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
+  <li class="active"><a data-toggle="tab" href="#state">State</a></li>
+  <li><a data-toggle="tab" href="#planetarium">SkyMap</a></li>
+  <li><a data-toggle="tab" href="#controll">Controll</a></li>
 </ul>
 <div class="tab-content">
 <!--   PRVNÍ ZÁLOŽKA -->
@@ -192,12 +234,12 @@ function Slew() {
   <div class="panel-heading">Mount status</div>
   <div class="panel-body">
     <div id="row">
-      <div class="col-sm-6">
+      <div class="col-sm-6" id="state">
         <div id="row">
             <div class="form-group col-sm-6">
                 <label>RA</label>
                 <div class="input-group">
-                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <input type="number" class="form-control" id="_ra-position" ng-model="vm.message.angular_velocity.z" value="No data" ng-readonly>
                   <span class="input-group-addon">Deg</span>
                 </div>
             </div>
@@ -205,7 +247,7 @@ function Slew() {
             <div class="form-group col-sm-6">
                 <label>DEC</label>
                 <div class="input-group">
-                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <input type="number" class="form-control" id="_dec-position" ng-model="vm.message.angular_velocity.z" value="No data" ng-readonly>
                   <span class="input-group-addon">Deg</span>
                 </div>
             </div>
@@ -213,7 +255,7 @@ function Slew() {
             <div class="form-group col-sm-6">
                 <label>ALT</label>
                 <div class="input-group">
-                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <input type="number" class="form-control" id="_alt-position" ng-model="vm.message.angular_velocity.z" value="No data" ng-readonly>
                   <span class="input-group-addon">Deg</span>
                 </div>
             </div>
@@ -221,7 +263,7 @@ function Slew() {
             <div class="form-group col-sm-6">
                 <label>AZ</label>
                 <div class="input-group">
-                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <input type="number" class="form-control" id="_az-position" ng-model="vm.message.angular_velocity.z" value="No data" ng-readonly>
                   <span class="input-group-addon">Deg</span>
                 </div>
             </div>
@@ -229,7 +271,7 @@ function Slew() {
             <div class="form-group col-sm-6">
                 <label>Axis 1</label>
                 <div class="input-group">
-                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <input type="number" class="form-control" id="_ax1-position" ng-model="vm.message.angular_velocity.z" value="NotImplementedError" ng-readonly>
                   <span class="input-group-addon">Ticks</span>
                 </div>
             </div>
@@ -237,14 +279,14 @@ function Slew() {
             <div class="form-group col-sm-6">
                 <label>Axis 2</label>
                 <div class="input-group">
-                  <input type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <input type="number" class="form-control" id="_ax2-position" ng-model="vm.message.angular_velocity.z" value="NotImplementedError" ng-readonly>
                   <span class="input-group-addon">Ticks</span>
                 </div>
             </div>
 
         </div>
       </div>
-    <div id="planetarium" style="height:400px;" class="col-sm-6"></div>
+    <div id="planetarium" style=" height: 400px;" class="col-sm-6 embed-responsive-1by1"></div>
     </div>
   </div>
 </div>
@@ -252,7 +294,7 @@ function Slew() {
 <div class="panel panel-default">
   <div class="panel-heading">Actual map</div>
   <div class="panel-body" style="padding: 0px;">
-<div id="planetariumControl" style="width:100%;height:800px;"></div>
+<div id="planetariumControl" style="width:100%;height:500px;" class="embed-responsive-16by10"></div>
   </div>
 </div>
 
@@ -260,7 +302,7 @@ function Slew() {
   <div class="panel-heading">Mount control</div>
   <div class="panel-body">
     <div id="row">
-        <div class="col-sm-6">
+        <div class="col-sm-6" id="controll">
           <div id="row">
             <div class="btn-group col-sm-12">
               <button type="button" id="mount_btn_control_radec" class="btn col-sm-3" onclick="ToggleGoToMethod('RaDec')">Ra/Dec</button>
@@ -287,7 +329,11 @@ function Slew() {
         </div>
         <div class="col-sm-6">
           <div id="row">
-
+          <table>
+            <tr><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-search"></button></td><td></td></tr>
+            <tr><td><button type="button" class="btn btn-default glyphicon glyphicon-triangle-left"></button></td><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-circle-arrow-right"></button></td></tr>
+            <tr><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-circle-arrow-down"></button></td><td></td></tr>
+          </table>
           </div>
         </div>
       </div>
@@ -314,7 +360,16 @@ function Slew() {
   </div>
 </div>
 
+<script type="text/javascript">
+  function update(){
 
+
+  }
+
+
+
+
+</script>
 
 
 {% end %}

@@ -1,7 +1,6 @@
 {% extends "template.html" %}
 
 {% block meta %}
-
 <script type="text/javascript" type="text/javascript">
   var ros = new ROSLIB.Ros({
     url : 'ws://telescopeC.local:9090'
@@ -22,68 +21,70 @@
     fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
  });
 
-  var MountControl = new ROSLIB.Topic({
-    ros : ros,
-    name : '/arom/mount',
-    messageType : 'arom/DriverControlm'    // tohle se zjisti v ''rostopic info ''
-  });
-
-	var MountMessage = new ROSLIB.Message({		//rosmsg show arom/DriverControlm
-		name : "",
-		type : "",
-		data : "",
-		validate : "",
-		check : ""
-	});
-
-
-function pubMessage() {
-	console.log("strart message");
-    var linearX = 0.0;
-    var angularZ = 0.0;
-
-    // Set the appropriate values on the message object
-    MountMessage.name = "mount";
-    MountMessage.type = "Slew";
-    MountMessage.data = "{'ra': 270, 'dec': 5}"
-
-    // Publish the message 
-	console.log(MountMessage);
-	console.log(MountControl);
-    var ble = MountControl.publish(MountMessage);
-	console.log(ble);
-}
-
+  
 </script>
 
 {% end %}{% block container %}
 
+
 <ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
-  <li><a data-toggle="tab" href="#menu1">Menu 1</a></li>
-  <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
+  <li class="active"><a data-toggle="tab" href="#state">State</a></li>
+  <li><a data-toggle="tab" href="#schleduler">Scheduler</a></li>
+  <li><a data-toggle="tab" href="#weather">Weather</a></li>
 </ul>
+
 <div class="tab-content">
-  <div id="home" class="tab-pane fade in active">
+  <div id="state" class="tab-pane fade in active">
     <h3>HOME</h3>
+    <div id="row">
+<!-- Zacatek jednoho panelu-->
+      <div>
+        <p>blablabla</p>
+      </div>
+<!-- Konec panelu-->
+    </div>
 
-    ---
 
-    <div id="starmap" style="width:944x;height:400px;"></div>
-    ---
-    <p>Some content.</p>
-	<button id="sendMsg" type="button" onclick="pubMessage()">Publish Message</button>
-	<div id="feedback"></div>
-  </div>
-  <div id="menu1" class="tab-pane fade">
+
+  </div><div id="schleduler" class="tab-pane fade">
     <h3>Menu 1</h3>
-    <p>Some content in menu 1.</p>
-  </div>
-  <div id="menu2" class="tab-pane fade">
-    <h3>Menu 2</h3>
-    <p>Some content in menu 2.</p>
+    <div id="row">
+<!-- Zacatek jednoho panelu-->
+
+<!-- Konec panelu-->
+    </div>
+
+
+
+  </div><div id="weather" class="tab-pane fade">
+    <h3>Weather</h3>
+    <div id="row" onshow="UpdateDataTable">
+<!-- Zacatek jednoho panelu-->
+<div class="panel panel-default" id="panel_avilable">
+  <div class="panel-heading">Available devices</div>
+  <div class="panel-body" id="weather_data_table">
   </div>
 </div>
+<!-- Konec panelu-->
+    </div>
+
+
+
+  </div>
+</div>
+
+<script>
+
+function UpdateDataTable () {
+  console.log("ahoj!!!!!!!");
+  $("#weather_data_table").load("/observatory/weather/datatable");
+}
+</script>
+<script type="text/javascript"> 
+    $("#panel_avilable").click(function(){
+        $("#weather_data_table").load("/observatory/weather/datatable"); 
+    });
+</script> 
 
 
 {% end %}
