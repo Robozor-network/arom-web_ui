@@ -23,13 +23,15 @@
 
   
 </script>
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 
 {% end %}{% block container %}
 
 
 <ul class="nav nav-tabs">
   <li class="active"><a data-toggle="tab" href="#state">State</a></li>
-  <li><a data-toggle="tab" href="#schleduler">Scheduler</a></li>
+  <li><a data-toggle="tab" href="#Scheduler">Scheduler</a></li>
   <li><a data-toggle="tab" href="#weather">Weather</a></li>
 </ul>
 
@@ -46,9 +48,9 @@
 
 
 
-  </div><div id="schleduler" class="tab-pane fade">
-    <h3>Menu 1</h3>
-    <div id="row">
+  </div><div id="Scheduler" class="tab-pane fade">
+    <h3>Scheduler</h3>
+    <div id="Scheduler">
 <!-- Zacatek jednoho panelu-->
 
 <!-- Konec panelu-->
@@ -60,9 +62,17 @@
     <h3>Weather</h3>
     <div id="row" onshow="UpdateDataTable">
 <!-- Zacatek jednoho panelu-->
+
 <div class="panel panel-default" id="panel_avilable">
   <div class="panel-heading">Available devices</div>
   <div class="panel-body" id="weather_data_table">
+  </div>
+</div>
+
+<div class="panel panel-default" id="row">
+  <div class="panel-heading">Graph</div>
+  <div class="panel-body" id="">
+    <div id="graph_all" style="height: 400px; min-width: 310px" class="col-sm-12"></div>
   </div>
 </div>
 <!-- Konec panelu-->
@@ -84,7 +94,104 @@ function UpdateDataTable () {
     $("#panel_avilable").click(function(){
         $("#weather_data_table").load("/observatory/weather/datatable"); 
     });
+  
+
+  function sec_5() {
+        $("#weather_data_table").load("/observatory/weather/datatable"); 
+  }
+  var interval = setInterval(sec_5, 5000);
 </script> 
+<script type="text/javascript">
+  
+$(function () {
+
+    $.getJSON('/observatory/weather/datatable/?type=json&data=weather', function (data) {
+
+        // Create a timer
+        var start = +new Date();
+
+        // Create the chart
+        $('#graph_all').highcharts('StockChart', {
+            chart: {
+                events: {
+                    load: function () {
+                        if (!window.isComparing) {
+                            this.setTitle(null, {
+                                text: 'Built chart in ' + (new Date() - start) + 'ms'
+                            });
+                        }
+                    }
+                },
+                zoomType: 'x'
+            },
+
+            rangeSelector: {
+
+                buttons: [{
+                    type: 'day',
+                    count: 3,
+                    text: '3d'
+                }, {
+                    type: 'week',
+                    count: 1,
+                    text: '1w'
+                }, {
+                    type: 'month',
+                    count: 1,
+                    text: '1m'
+                }, {
+                    type: 'month',
+                    count: 6,
+                    text: '6m'
+                }, {
+                    type: 'year',
+                    count: 1,
+                    text: '1y'
+                }, {
+                    type: 'all',
+                    text: 'All'
+                }],
+                selected: 3
+            },
+
+            yAxis: {
+                title: {
+                    text: 'Temperature (°C)'
+                }
+            },
+
+            title: {
+                text: 'Hourly temperatures in Vik i Sogn, Norway, 2009-2015'
+            },
+
+            subtitle: {
+                text: 'Built chart in ...' // dummy text to reserve space for dynamic subtitle
+            },
+
+            series: [{
+                name: 'Temperature',
+                data: data.data,
+                pointStart: data.pointStart,
+                pointInterval: data.pointInterval,
+                tooltip: {
+                    valueDecimals: 1,
+                    valueSuffix: '°C'
+                },{
+                name: 'WindSpeed',
+                data: data.data,
+                pointStart: data.pointStart,
+                pointInterval: data.pointInterval,
+                tooltip: {
+                    valueDecimals: 1,
+                    valueSuffix: 'm/s'
+                },
+
+            }]
+
+        });
+    });
+});  
+</script>
 
 
 {% end %}

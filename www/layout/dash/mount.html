@@ -306,9 +306,9 @@ MountLocationUpdate.subscribe(function(message) {
           <div id="row">
             <div class="btn-group col-sm-12">
               <button type="button" id="mount_btn_control_radec" class="btn col-sm-3" onclick="ToggleGoToMethod('RaDec')">Ra/Dec</button>
-              <button type="button" id="mount_btn_control_hadec" class="btn col-sm-3" onclick="ToggleGoToMethod('HaDec')">Ha/Dec</button>
+              <button type="button" id="mount_btn_control_hadec" class="btn disabled col-sm-3" onclick="ToggleGoToMethod('HaDec')" disabled>Ha/Dec</button>
               <button type="button" id="mount_btn_control_altaz" class="btn btn-primary col-sm-3" onclick="ToggleGoToMethod('AltAz')">Alt/Az</button>
-              <button type="button" id="mount_btn_control_axis" class="btn disabled col-sm-3" onclick="ToggleGoToMethod('Axis')">Axis 1/ Axis 2</button>
+              <button type="button" id="mount_btn_control_axis" class="btn disabled col-sm-3" onclick="ToggleGoToMethod('Axis')" disabled>Axis 1/ Axis 2</button>
             </div>
             <div class="form-group col-sm-6">
                 <label id="MountControlAlt_label">ALT</label>

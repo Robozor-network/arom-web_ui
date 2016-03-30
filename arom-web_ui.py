@@ -2,6 +2,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import time
+import datetime
 import tornado.ioloop
 import tornado.web
 from tornado import web
@@ -28,7 +30,7 @@ import MySQLdb as mdb
 observatory = EarthLocation(lat=49*u.deg, lon=14*u.deg, height=300*u.m)
 
 leftmenu = [["observatory", "observatory"],["Vec 1", "#"], ["Vec 2", "#"], ["Vec 3", "#"], ["Mount", "mount"]]
-leftmenu = [["observatory", "observatory"],["Vec 1", "#"], ["Vec 2", "#"], ["Vec 3", "#"], ["Mount", "mount"]]
+leftmenu = [["observatory", "observatory"], ["Mount", "mount"]]
 
 
 def _sql(query, read=False):
@@ -70,9 +72,10 @@ class Obs_weather_datatable(web.RequestHandler):
     def get(self, addres=None):
         data = _sql('SELECT id, date, sensors_id, value FROM weather WHERE (date > %f)  GROUP BY sensors_id ORDER BY date DESC;' %(Time.now().unix-60))
         print data
-        string = ""
+        string = '<table class="table">'
         for row in data:
-            string += repr(row)+'<br>'
+            string += '<tr><td>'+datetime.datetime.fromtimestamp(float(row[1])).strftime('%Y-%m-%d %H:%M:%S')+'</td><td>'+str(float(row[3]))+'</td></tr>'
+        string += '</table>'
         self.finish(string)
 
 
