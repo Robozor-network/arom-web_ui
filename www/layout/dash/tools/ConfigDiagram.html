@@ -1,0 +1,46 @@
+<!DOCTYPE html>  <!-- HTML5 document type -->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="/go-debug.js"></script>
+</head>
+<body>
+  <div id="myDiagramDiv" style="width:100%; height:400px; background-color: #DAE4E4;"></div>
+
+<script type="text/javascript">
+
+var $ = go.GraphObject.make;
+var myDiagram =
+  $(go.Diagram, "myDiagramDiv",
+    {
+      initialContentAlignment: go.Spot.Center, // center Diagram contents
+      "undoManager.isEnabled": true, // enable Ctrl-Z to undo and Ctrl-Y to redo
+      layout: $(go.TreeLayout, // specify a Diagram.layout that arranges trees
+      { angle: 90, layerSpacing: 35 })
+    });
+
+
+// define a simple Node template
+myDiagram.nodeTemplate =
+  $(go.Node, "Horizontal",
+    { background: "blue" },
+    $(go.TextBlock,
+      "Default Text", { margin: 12, stroke: "white", font: "bold 16px sans-serif" },
+      new go.Binding("text", "name"))
+  );
+
+
+var model = $(go.TreeModel);
+model.nodeDataArray =[
+  { key: "1",              name: "AromBrain"  },
+  { key: "2", parent: "1", name: "AWS"    },
+  { key: "3", parent: "1", name: "Ovw"   },
+  { key: "4", parent: "1", name: "Mount" },
+  { key: "5", parent: "4", name: "Telescope 1"     },
+  { key: "6", parent: "4", name: "Telescope" }
+];
+myDiagram.model = model;
+
+</script>
+</body>
+</html>

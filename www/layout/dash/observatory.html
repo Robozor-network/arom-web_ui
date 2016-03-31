@@ -21,10 +21,8 @@
     fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
  });
 
-  
 </script>
-<script src="https://code.highcharts.com/stock/highstock.js"></script>
-<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
 
 {% end %}{% block container %}
 
@@ -40,13 +38,11 @@
     <h3>HOME</h3>
     <div id="row">
 <!-- Zacatek jednoho panelu-->
-      <div>
-        <p>blablabla</p>
+      <div class="panel panel-default cfg_panel" id="panel_avilable"> <div class="panel-heading">Network cfg</div> <div class="panel-body">
+          </div>
       </div>
 <!-- Konec panelu-->
     </div>
-
-
 
   </div><div id="Scheduler" class="tab-pane fade">
     <h3>Scheduler</h3>
@@ -57,24 +53,19 @@
     </div>
 
 
-
   </div><div id="weather" class="tab-pane fade">
     <h3>Weather</h3>
     <div id="row" onshow="UpdateDataTable">
 <!-- Zacatek jednoho panelu-->
 
-<div class="panel panel-default" id="panel_avilable">
-  <div class="panel-heading">Available devices</div>
-  <div class="panel-body" id="weather_data_table">
-  </div>
-</div>
+<div class="panel panel-default" id="panel_avilable"> <div class="panel-heading">Available devices</div> <div class="panel-body" id="weather_data_table">
 
-<div class="panel panel-default" id="row">
-  <div class="panel-heading">Graph</div>
-  <div class="panel-body" id="">
-    <div id="graph_all" style="height: 400px; min-width: 310px" class="col-sm-12"></div>
-  </div>
-</div>
+</div></div>
+
+<div class="panel panel-default" id="row" > <div class="panel-heading">Graph</div> <div class="panel-body" id="" style="padding: 0px;">
+    <div id="container" style="height: 400px; min-width: 310px; padding: 0px;" class="col-sm-12"></div>
+
+</div></div>
 <!-- Konec panelu-->
     </div>
 
@@ -103,95 +94,68 @@ function UpdateDataTable () {
 </script> 
 <script type="text/javascript">
   
+
 $(function () {
 
-    $.getJSON('/observatory/weather/datatable/?type=json&data=weather', function (data) {
+    $.getJSON('/observatory/weather/datatable/?type=json&data=weather&sens=2', function (data) {
+        $('#container').highcharts('StockChart', {
 
-        // Create a timer
-        var start = +new Date();
 
-        // Create the chart
-        $('#graph_all').highcharts('StockChart', {
-            chart: {
-                events: {
-                    load: function () {
-                        if (!window.isComparing) {
-                            this.setTitle(null, {
-                                text: 'Built chart in ' + (new Date() - start) + 'ms'
-                            });
-                        }
-                    }
-                },
-                zoomType: 'x'
+            rangeSelector : {
+                selected : 1
             },
 
-            rangeSelector: {
-
-                buttons: [{
-                    type: 'day',
-                    count: 3,
-                    text: '3d'
-                }, {
-                    type: 'week',
-                    count: 1,
-                    text: '1w'
-                }, {
-                    type: 'month',
-                    count: 1,
-                    text: '1m'
-                }, {
-                    type: 'month',
-                    count: 6,
-                    text: '6m'
-                }, {
-                    type: 'year',
-                    count: 1,
-                    text: '1y'
-                }, {
-                    type: 'all',
-                    text: 'All'
-                }],
-                selected: 3
-            },
-
-            yAxis: {
-                title: {
-                    text: 'Temperature (°C)'
+            series : [{
+                name : 'AWS_ambient_temp_2m',
+                data : data,
+                tooltip: {
+                    valueDecimals: 2
                 }
+            }],
+            xAxis: {
+              type: 'datetime',
+              ordinal: false,
+              dateTimeLabelFormats: { // don't display the dummy year
+                  month: '%e. %b',
+                  year: '%b'
+              },
+              title: {
+                  text: 'Date'
+              }
             },
-
-            title: {
-                text: 'Hourly temperatures in Vik i Sogn, Norway, 2009-2015'
-            },
-
-            subtitle: {
-                text: 'Built chart in ...' // dummy text to reserve space for dynamic subtitle
-            },
-
-            series: [{
-                name: 'Temperature',
-                data: data.data,
-                pointStart: data.pointStart,
-                pointInterval: data.pointInterval,
-                tooltip: {
-                    valueDecimals: 1,
-                    valueSuffix: '°C'
-                },{
-                name: 'WindSpeed',
-                data: data.data,
-                pointStart: data.pointStart,
-                pointInterval: data.pointInterval,
-                tooltip: {
-                    valueDecimals: 1,
-                    valueSuffix: 'm/s'
-                },
-
-            }]
-
         });
     });
-});  
+
+
+});
+
+
+
+
+</script>
+
+
+     
+{% end %}{% block last %}
+<script type="text/javascript">
+
+   $(function(){
+        $('.cfg_panel').lobiPanel({
+            sortable: true,
+            close: false,
+            reload: true,
+            editTitle: false,
+            loadUrl: '/observatory/cfg/'
+            
+        });
+    });
+
+
 </script>
 
 
 {% end %}
+
+
+
+

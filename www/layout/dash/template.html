@@ -4,13 +4,17 @@
     <meta charset="utf-8">
     <title>{{title}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/lobipanel.min.css"/>
     <link href="dashboard.css" rel="stylesheet">
     <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.js"></script>
     <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.js"></script>
     <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/core_ROS.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
     <style type="text/css">
     .container-fluid{
         padding-top: 2em;
@@ -139,7 +143,7 @@
                 <div class="row" style="margin: 0px">
                     <div class="panel panel-default">
                         <div class="panel-body">
-                            <div class="row" style="margin: 0px;">
+                            <div id="row" style="margin: 0px;">
                                 {% block container %}{% end %}
                             </div>
                         </div>
@@ -151,6 +155,9 @@
 
 
    
-    <script src="/bootstrap.min.js" type="text/html"></script>
+      <script src="/bootstrap.min.js" type="text/html"></script>
+      <script src="/jquery-ui.min.js"></script>
+      <script src="/lobipanel.min.js"></script>
+     {% block last %}{% end %}
   </body>
 </html>

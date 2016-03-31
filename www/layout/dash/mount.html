@@ -170,7 +170,6 @@ MountLocationUpdate.subscribe(function(message) {
   });
 
 </script>
-<script src="/jquery-1.10.0.min.js"></script>
 <script src="/virtualsky-0.6.2.min.js"></script>
 <script type="text/javascript">
 <!--
@@ -226,15 +225,10 @@ MountLocationUpdate.subscribe(function(message) {
 </ul>
 <div class="tab-content">
 <!--   PRVNÍ ZÁLOŽKA -->
-  <div id="home" class="tab-pane fade in active">
+<div id="home" class="tab-pane fade in active">
+<div id="row">
 
-<div id="nodes"></div>
-
-<div class="panel panel-default">
-  <div class="panel-heading">Mount status</div>
-  <div class="panel-body">
-    <div id="row">
-      <div class="col-sm-6" id="state">
+<div class="col-sm-6"> <div class="panel panel-default"> <div class="panel-heading">Mount status</div> <div class="panel-body">
         <div id="row">
             <div class="form-group col-sm-6">
                 <label>RA</label>
@@ -283,26 +277,18 @@ MountLocationUpdate.subscribe(function(message) {
                   <span class="input-group-addon">Ticks</span>
                 </div>
             </div>
-
         </div>
-      </div>
-    <div id="planetarium" style=" height: 400px;" class="col-sm-6 embed-responsive-1by1"></div>
-    </div>
-  </div>
-</div>
+</div></div></div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Actual map</div>
-  <div class="panel-body" style="padding: 0px;">
+<div class="col-sm-6"><div class="panel panel-default"> <div class="panel-heading">Mount status</div> <div class="panel-body">
+    <div id="planetarium" style=" height: 400px;" class="span12 embed-responsive-1by1"></div>
+</div></div></div>
+
+<div class="col-sm-12"> <div class="panel panel-default"> <div class="panel-heading">Actual map</div> <div class="panel-body" style="padding: 0px;">
 <div id="planetariumControl" style="width:100%;height:500px;" class="embed-responsive-16by10"></div>
-  </div>
-</div>
+  </div> </div> </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading">Mount control</div>
-  <div class="panel-body">
-    <div id="row">
-        <div class="col-sm-6" id="controll">
+<div class="col-sm-6"> <div class="panel panel-default"> <div class="panel-heading">Mount control</div> <div class="panel-body">
           <div id="row">
             <div class="btn-group col-sm-12">
               <button type="button" id="mount_btn_control_radec" class="btn col-sm-3" onclick="ToggleGoToMethod('RaDec')">Ra/Dec</button>
@@ -326,8 +312,9 @@ MountLocationUpdate.subscribe(function(message) {
             </div>
             <button class="btn col-sm-12 btn-primary" type="submit" onclick="Slew()">Slew</button>
           </div>
-        </div>
-        <div class="col-sm-6">
+</div> </div> </div>
+
+  <div class="col-sm-6"> <div class="panel panel-default"> <div class="panel-heading">Mount control</div> <div class="panel-body">
           <div id="row">
           <table>
             <tr><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-search"></button></td><td></td></tr>
@@ -335,18 +322,17 @@ MountLocationUpdate.subscribe(function(message) {
             <tr><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-circle-arrow-down"></button></td><td></td></tr>
           </table>
           </div>
-        </div>
-      </div>
-  </div>
-</div>
+</div> </div> </div>
 
 
+  <div class="col-sm-6"> <div class="panel panel-default"> <div class="panel-heading">Mount control</div> <div class="panel-body">
 
 	<button id="sendMsg" type="button" onclick="pubMessage()">Publish Message</button>
 
-  </div>
 	<div id="feedback"></div>
+</div> </div> </div>
 
+</div>
 
 <!--   DRUHÁ ZÁLOŽKA -->
   </div> <div id="menu1" class="tab-pane fade">
@@ -360,16 +346,23 @@ MountLocationUpdate.subscribe(function(message) {
   </div>
 </div>
 
+
+
+
+
+
+{% end %}{% block last %}
 <script type="text/javascript">
-  function update(){
 
-
-  }
-
-
-
+   $(function(){
+        $('.panel').lobiPanel({
+            sortable: true,
+            close: false,
+            editTitle: false
+            
+        });
+    });
 
 </script>
-
 
 {% end %}

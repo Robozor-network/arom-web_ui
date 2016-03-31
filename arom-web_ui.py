@@ -70,17 +70,38 @@ class Observatory(web.RequestHandler):
 class Obs_weather_datatable(web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, addres=None):
+        arg_data = self.get_argument('data', False)
+        arg_type = self.get_argument('type', False)
+        arg_sens = self.get_argument('sens', 0)
+        print arg_type, arg_data, "---------"
+        if arg_data and arg_type:
+            data = _sql('SELECT date, avg(value) from weather WHERE sensors_id = %i GROUP BY date div (60*10) ORDER BY date;' %(int(arg_sens)))
+            self.write('[\n\r['+str(float(data[0][0])*1000)+','+str(round(float(data[0][1]),3))+']')
+            for row in data:
+                self.write(',['+str(float(row[0])*1000)+','+str(round(float(row[1]),3))+']\n\r')
+                #sout.append([float(row[0]), float(row[1])])
+            self.finish('\n\r]')
+            return
+
         data = _sql('SELECT id, date, sensors_id, value FROM weather WHERE (date > %f)  GROUP BY sensors_id ORDER BY date DESC;' %(Time.now().unix-60))
         print data
         string = '<table class="table">'
         for row in data:
-            string += '<tr><td>'+datetime.datetime.fromtimestamp(float(row[1])).strftime('%Y-%m-%d %H:%M:%S')+'</td><td>'+str(float(row[3]))+'</td></tr>'
+            string += '<tr><td>'+datetime.datetime.fromtimestamp(float(row[1])).strftime('%Y-%m-%d %H:%M:%S')+'</td><td>'+str(row[2])+'</td><td>'+str(float(row[3]))+'</td></tr>'
         string += '</table>'
         self.finish(string)
 
+class Obs_config_diagram(web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self, addres=None):
+        self.render("www/layout/dash/tools/ConfigDiagram.html", _sql=_sql)
+
+
+        
+
 
 class processing(web.RequestHandler):
-    #@tornado.web.asynchronous
+    @tornado.web.asynchronous
     def get(self, arg = None):
         print "processing", arg
         coord = self.get_argument("coord", False)
@@ -112,7 +133,8 @@ app = web.Application([
         (r'/', Overview),
         (r'/index', Overview),
         (r'/mount', Mount),
-        (r'/observatory/weather/datatable', Obs_weather_datatable),
+        (r'/observatory/weather/(.*)', Obs_weather_datatable),
+        (r'/observatory/cfg/(.*)', Obs_config_diagram),
         (r'/observatory', Observatory),
         (r'/obs', Observatory),
         (r'/processing', processing),
