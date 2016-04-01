@@ -38,7 +38,7 @@
     <h3>HOME</h3>
     <div id="row">
 <!-- Zacatek jednoho panelu-->
-      <div class="panel panel-default cfg_panel" id="panel_avilable"> <div class="panel-heading">Network cfg</div> <div class="panel-body">
+      <div class="panel arom_panel_nodes panel-default cfg_panel" id="panel_avilable"> <div class="panel-heading">Network cfg</div> <div class="panel-body" id="panel_inner_tree">
           </div>
       </div>
 <!-- Konec panelu-->
@@ -58,11 +58,11 @@
     <div id="row" onshow="UpdateDataTable">
 <!-- Zacatek jednoho panelu-->
 
-<div class="panel panel-default" id="panel_avilable"> <div class="panel-heading">Available devices</div> <div class="panel-body" id="weather_data_table">
+<div class="panel arom_panel panel-default" id="panel_avilable"> <div class="panel-heading">Available devices</div> <div class="panel-body" id="weather_data_table">
 
 </div></div>
 
-<div class="panel panel-default" id="row" > <div class="panel-heading">Graph</div> <div class="panel-body" id="" style="padding: 0px;">
+<div class="panel arom_panel panel-default" id="row" > <div class="panel-heading">Graph</div> <div class="panel-body" id="" style="padding: 0px;">
     <div id="container" style="height: 400px; min-width: 310px; padding: 0px;" class="col-sm-12"></div>
 
 </div></div>
@@ -82,6 +82,11 @@ function UpdateDataTable () {
 }
 </script>
 <script type="text/javascript"> 
+    function init(){
+      $("#panel_inner_tree").load("/observatory/cfg/"); 
+      $("#weather_data_table").load("/observatory/weather/datatable");
+    }
+
     $("#panel_avilable").click(function(){
         $("#weather_data_table").load("/observatory/weather/datatable"); 
     });
@@ -91,9 +96,13 @@ function UpdateDataTable () {
         $("#weather_data_table").load("/observatory/weather/datatable"); 
   }
   var interval = setInterval(sec_5, 5000);
+
+  init();
+//$("#panel_inner_tree").load("/observatory/cfg/"); 
 </script> 
 <script type="text/javascript">
-  
+$("#panel_inner_tree").load("/observatory/cfg/"); 
+
 
 $(function () {
 
@@ -140,15 +149,26 @@ $(function () {
 <script type="text/javascript">
 
    $(function(){
-        $('.cfg_panel').lobiPanel({
+        $('.arom_panel').lobiPanel({
             sortable: true,
             close: false,
-            reload: true,
+            reload: false,
             editTitle: false,
-            loadUrl: '/observatory/cfg/'
             
         });
     });
+
+
+   $(function(){
+        $('.arom_panel_nodes').lobiPanel({
+            sortable: true,
+            close: false,
+            reload: false,
+            editTitle: false
+            
+        });
+    });
+
 
 
 </script>

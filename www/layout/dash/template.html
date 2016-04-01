@@ -10,7 +10,7 @@
     <link href="dashboard.css" rel="stylesheet">
     <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.js"></script>
     <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.js"></script>
-    <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/core_ROS.js"></script>
+    <!--<script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/core_ROS.js"></script>-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="https://code.highcharts.com/stock/highstock.js"></script>
@@ -34,17 +34,17 @@
 
       ros.on('connection', function() {
            var fbDiv = document.getElementById('feedback');
-           fbDiv.innerHTML += "<p>Connected to websocket server.</p>";
+           //fbDiv.innerHTML += "<p>Connected to websocket server.</p>";
       });
 
       ros.on('error', function(error) {
           var fbDiv = document.getElementById('feedback');
-          fbDiv.innerHTML += "<p>Error connecting to websocket server.</p>";
+          //fbDiv.innerHTML += "<p>Error connecting to websocket server.</p>";
       });
 
       ros.on('close', function() {
           var fbDiv = document.getElementById('feedback');
-          fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
+          //fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
       });
 
       var MountControl = new ROSLIB.Topic({
