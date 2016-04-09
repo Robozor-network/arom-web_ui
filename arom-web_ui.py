@@ -16,6 +16,7 @@ from tornado import options
 from tornado import web
 import json
 import ephem
+import rospy
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import Angle
@@ -74,35 +75,43 @@ class Obs_weather_datatable(web.RequestHandler):
         arg_type = self.get_argument('type', False)
         arg_sens = self.get_argument('sens', 0)
         print arg_type, arg_data, "---------"
-        if arg_data and arg_type:
+        if arg_data == 'weather' and arg_type == 'json':
             data = _sql('SELECT date, avg(value) from weather WHERE sensors_id = %i GROUP BY date div (60*10) ORDER BY date;' %(int(arg_sens)))
             self.write('[\n\r['+str(float(data[0][0])*1000)+','+str(round(float(data[0][1]),3))+']')
             for row in data:
                 self.write(',['+str(float(row[0])*1000)+','+str(round(float(row[1]),3))+']\n\r')
                 #sout.append([float(row[0]), float(row[1])])
             self.finish('\n\r]')
-            return
 
-        data = _sql('SELECT id, date, sensors_id, value FROM weather WHERE (date > %f)  GROUP BY sensors_id ORDER BY date DESC;' %(Time.now().unix-60))
-        print data
-        string = '<table class="table">'
-        for row in data:
-            string += '<tr><td>'+datetime.datetime.fromtimestamp(float(row[1])).strftime('%Y-%m-%d %H:%M:%S')+'</td><td>'+str(row[2])+'</td><td>'+str(float(row[3]))+'</td></tr>'
-        string += '</table>'
-        self.finish(string)
+        elif arg_data == 'AROMconfig' and arg_type == 'json':
+            pass
+        else:
+            data = _sql('SELECT id, date, sensors_id, value FROM weather WHERE (date > %f)  GROUP BY sensors_id ORDER BY date DESC;' %(Time.now().unix-60))
+            print data
+            string = '<table class="table">'
+            for row in data:
+                string += '<tr><td>'+datetime.datetime.fromtimestamp(float(row[1])).strftime('%Y-%m-%d %H:%M:%S')+'</td><td>'+str(row[2])+'</td><td>'+str(float(row[3]))+'</td></tr>'
+            string += '</table>'
+            self.finish(string)
+
+class DriverPage(web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self, addres=None):
+        print "web", addres
+        #self.render("www/layout/dash/observatory.html", title = "AROM control center | observatory", leftmenu = leftmenu, actual = 'observatory', _sql=_sql)
+        self.finish("loading...")
 
 class Obs_config_diagram(web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, addres=None):
         self.render("www/layout/dash/tools/ConfigDiagram.html", _sql=_sql)
-
-
         
 
 
 class processing(web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, arg = None):
+        rospy.logerr("processing")
         print "processing", arg
         coord = self.get_argument("coord", False)
         if coord:
@@ -117,7 +126,7 @@ class processing(web.RequestHandler):
                     #"az": param['az'],
                     }
                 print sout
-                self.write(escape.json_encode(sout))
+                self.finish(escape.json_encode(sout))
 
                 
             elif param['typ'] == 'RaDec2AltAz':
@@ -125,6 +134,8 @@ class processing(web.RequestHandler):
                 #F_az = (np.abs(self.horizont[:,0] - altaz.az.degree)).argmin()
                 #local_horizont = self.horizont[F_az]
                 pass
+        else:
+            rospy.logerr("Chyba v processing")
 
 
 
@@ -139,6 +150,7 @@ app = web.Application([
         (r'/obs', Observatory),
         (r'/processing', processing),
         (r'/processing(.*)', processing),
+        (r'/driver/(.*)', DriverPage),
        # (r'/multibolid(.*)', MultiBolid),
        # (r'/multibolid', MultiBolid),
        # (r'/realtime(.*)', RTbolidozor),
@@ -148,6 +160,8 @@ app = web.Application([
         (r'/fonts/(.*)', tornado.web.StaticFileHandler,{"path": './www/fonts/' }),
         (r"/(.*\.png)", tornado.web.StaticFileHandler,{"path": './www/media/' }),
         (r"/(.*\.jpg)", tornado.web.StaticFileHandler,{"path": './www/media/' }),
+        (r"/(.*\.ogg)", tornado.web.StaticFileHandler,{"path": './www/media/' }),
+        (r"/(.*\.wav)", tornado.web.StaticFileHandler,{"path": './www/media/' }),
         (r"/(.*\.woff2)", tornado.web.StaticFileHandler,{"path": './www/fonts/' }),
         (r"/(.*\.css)", tornado.web.StaticFileHandler,{"path": './www/css/' }),
         (r"/(.*\.wav)", tornado.web.StaticFileHandler,{"path": './www/wav/' }),

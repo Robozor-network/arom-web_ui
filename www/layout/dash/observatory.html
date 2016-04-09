@@ -1,36 +1,16 @@
 {% extends "template.html" %}
 
 {% block meta %}
-<script type="text/javascript" type="text/javascript">
-  var ros = new ROSLIB.Ros({
-    url : 'ws://telescopeC.local:9090'
-  }); 
 
-    ros.on('connection', function() {
-     var fbDiv = document.getElementById('feedback');
-     fbDiv.innerHTML += "<p>Connected to websocket server.</p>";
- });
-
-   ros.on('error', function(error) {
-    var fbDiv = document.getElementById('feedback');
-    fbDiv.innerHTML += "<p>Error connecting to websocket server.</p>";
-});
-
-   ros.on('close', function() {
-    var fbDiv = document.getElementById('feedback');
-    fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
- });
-
-</script>
-
-
-{% end %}{% block container %}
+{% end %}
+{% block container %}
 
 
 <ul class="nav nav-tabs">
   <li class="active"><a data-toggle="tab" href="#state">State</a></li>
   <li><a data-toggle="tab" href="#Scheduler">Scheduler</a></li>
   <li><a data-toggle="tab" href="#weather">Weather</a></li>
+  <li><a data-toggle="tab" href="#config">Config</a></li>
 </ul>
 
 <div class="tab-content">
@@ -38,16 +18,9 @@
     <h3>HOME</h3>
     <div id="row">
 <!-- Zacatek jednoho panelu-->
-      <div class="panel arom_panel_nodes panel-default cfg_panel" id="panel_avilable"> <div class="panel-heading">Network cfg</div> <div class="panel-body" id="panel_inner_tree">
+      <div class="panel arom_panel_obs_nodes panel-default cfg_panel" id="panel_avilable"> <div class="panel-heading">Network cfg</div> <div class="panel-body" id="panel_inner_tree">
           </div>
       </div>
-<!-- Konec panelu-->
-    </div>
-
-  </div><div id="Scheduler" class="tab-pane fade">
-    <h3>Scheduler</h3>
-    <div id="Scheduler">
-<!-- Zacatek jednoho panelu-->
 
 <!-- Konec panelu-->
     </div>
@@ -58,28 +31,37 @@
     <div id="row" onshow="UpdateDataTable">
 <!-- Zacatek jednoho panelu-->
 
-<div class="panel arom_panel panel-default" id="panel_avilable"> <div class="panel-heading">Available devices</div> <div class="panel-body" id="weather_data_table">
+<div class="panel arom_panel_obs panel-default" id="panel_avilable"> <div class="panel-heading">Available devices</div> <div class="panel-body" id="weather_data_table">
 
 </div></div>
 
-<div class="panel arom_panel panel-default" id="row" > <div class="panel-heading">Graph</div> <div class="panel-body" id="" style="padding: 0px;">
-    <div id="container" style="height: 400px; min-width: 310px; padding: 0px;" class="col-sm-12"></div>
+<div class="panel arom_panel_obs panel-default" id="row" > <div class="panel-heading">Graph</div> <div class="panel-body" id="" style="padding: 0px;">
+    <div id="container" style="height: 400px; min-width: 310px; padding: 0px; " class="col-sm-12"></div>
 
 </div></div>
 <!-- Konec panelu-->
     </div>
-
-
-
   </div>
+
+
+<!-- Konec panelu-->
+    </div></div><div id="config" class="tab-pane fade">
+    <h3>Config</h3>
+    <div id="row" onshow="UpdateDataTable">
+<!-- Zacatek jednoho panelu-->
+
+
+<!-- Konec panelu-->
+    </div>
 </div>
 
 <script>
 
 function UpdateDataTable () {
-  console.log("ahoj!!!!!!!");
-  $("#weather_data_table").load("/observatory/weather/datatable");
+    console.log("ahoj!!!!!!!");
+    $("#weather_data_table").load("/observatory/weather/datatable");
 }
+
 </script>
 <script type="text/javascript"> 
     function init(){
@@ -88,6 +70,7 @@ function UpdateDataTable () {
     }
 
     $("#panel_avilable").click(function(){
+        console.log("Klikl jsi");
         $("#weather_data_table").load("/observatory/weather/datatable"); 
     });
   
@@ -95,31 +78,76 @@ function UpdateDataTable () {
   function sec_5() {
         $("#weather_data_table").load("/observatory/weather/datatable"); 
   }
+  
   var interval = setInterval(sec_5, 5000);
-
   init();
-//$("#panel_inner_tree").load("/observatory/cfg/"); 
-</script> 
-<script type="text/javascript">
+
 $("#panel_inner_tree").load("/observatory/cfg/"); 
 
 
-$(function () {
 
+
+</script>
+
+
+<script type="text/javascript">
+          // ===========================
+            $(function(){
+                $('.arom_panel_obs').lobiPanel({
+                    sortable: true,
+                    close: false,
+                    editTitle: false
+                      
+                });
+            });
+</script>
+
+<script type="text/javascript">
+$(function () {
     $.getJSON('/observatory/weather/datatable/?type=json&data=weather&sens=2', function (data) {
         $('#container').highcharts('StockChart', {
-
-
             rangeSelector : {
-                selected : 1
+                selected : 1,
+                buttons: [{
+                  type: 'hour',
+                  count: 6,
+                  text: '6h'
+                },{
+                  type: 'day',
+                  count: 1,
+                  text: 'd'
+                },{
+                  type: 'day',
+                  count: 3,
+                  text: '3d'
+                }, {
+                  type: 'day',
+                  count: 7,
+                  text: 'w'
+                }, {
+                  type: 'month',
+                  count: 1,
+                  text: 'm'
+                }, {
+                  type: 'month',
+                  count: 6,
+                  text: '6m'
+                }/*, {
+                  type: 'ytd',
+                  text: 'YTD'
+                }, {
+                  type: 'year',
+                  count: 1,
+                  text: '1y'
+                }*/, {
+                  type: 'all',
+                  text: 'All'
+                }]
             },
 
             series : [{
                 name : 'AWS_ambient_temp_2m',
                 data : data,
-                tooltip: {
-                    valueDecimals: 2
-                }
             }],
             xAxis: {
               type: 'datetime',
@@ -131,48 +159,49 @@ $(function () {
               title: {
                   text: 'Date'
               }
+            }, 
+            legend: {
+                verticalAlign: 'middle',
+                borderWidth: 1
+            },credits: {
+                enabled: false
             },
         });
     });
-
-
 });
 
 
-
-
 </script>
-
-
-     
-{% end %}{% block last %}
 <script type="text/javascript">
 
-   $(function(){
-        $('.arom_panel').lobiPanel({
-            sortable: true,
-            close: false,
-            reload: false,
-            editTitle: false,
-            
-        });
-    });
-
-
-   $(function(){
-        $('.arom_panel_nodes').lobiPanel({
-            sortable: true,
-            close: false,
-            reload: false,
-            editTitle: false
-            
-        });
-    });
-
-
+    function UpdateDataTable () {
+        console.log("ahoj!!!!!!!");
+        $("#weather_data_table").load("/observatory/weather/datatable");
+    }
 
 </script>
+<script type="text/javascript"> 
+    function init(){
+        $("#panel_inner_tree").load("/observatory/cfg/"); 
+        $("#weather_data_table").load("/observatory/weather/datatable");
+    }
 
+    $("#panel_avilable").click(function(){
+        console.log("Klikl jsi");
+        $("#weather_data_table").load("/observatory/weather/datatable"); 
+    });
+  
+
+    function sec_5() {
+        $("#weather_data_table").load("/observatory/weather/datatable"); 
+    }
+  
+    var interval = setInterval(sec_5, 5000);
+    init();
+
+    $("#panel_inner_tree").load("/observatory/cfg/"); 
+
+</script>
 
 {% end %}
 

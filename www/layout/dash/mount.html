@@ -2,25 +2,10 @@
 
 {% block meta %}
 
-<script>
-  var getJSON = function(url, callback) {
-      var xhr = new XMLHttpRequest();
-      xhr.open("get", url, true);
-      xhr.responseType = "json";
-      xhr.onload = function() {
-        var status = xhr.status;
-        if (status == 200) {
-          callback(null, xhr.response);
-        } else {
-          callback(status);
-        }
-      };
-      xhr.send();
-  }
-</script>
+<script src="/virtualsky-0.6.2.min.js"></script>
+{% end %}{% block container %}
 
 <script type="text/javascript">
-
 
 
 function pubMessage() {
@@ -30,8 +15,8 @@ function pubMessage() {
 
     // Set the appropriate values on the message object
     MountMessage.name = "mount";
-    MountMessage.type = "Slew";
-    MountMessage.data = "{'ra':120, 'dec':5}"
+    MountMessage.type = "advSlew";
+    MountMessage.data = "{'type': 'radec','ra':120, 'dec':5}"
 
     // Publish the message 
 	console.log(MountMessage);
@@ -53,6 +38,8 @@ function ToggleGoToMethod(method) {
       document.getElementById("mount_btn_control_axis").className = "btn disabled col-sm-3";
       document.getElementById("MountControlAlt_label").innerHTML = "Altitude";
       document.getElementById("MountControlAz_label").innerHTML = "Azimuth";
+      document.getElementById("MountControlAlt").value = document.getElementById('_alt-position').value;
+      document.getElementById("MountControlAz").value = document.getElementById('_az-position').value;
       break;
     case 'RaDec':
       document.getElementById("mount_btn_control_radec").className = "btn btn-primary col-sm-3";
@@ -61,6 +48,8 @@ function ToggleGoToMethod(method) {
       document.getElementById("mount_btn_control_axis").className = "btn disabled col-sm-3";
       document.getElementById("MountControlAlt_label").innerHTML = "Right ascension";
       document.getElementById("MountControlAz_label").innerHTML = "Declination";
+      document.getElementById("MountControlAlt").value = document.getElementById('_ra-position').value;
+      document.getElementById("MountControlAz").value = document.getElementById('_dec-position').value;
       break;
     case 'HaDec':
       document.getElementById("mount_btn_control_radec").className = "btn col-sm-3";
@@ -86,7 +75,7 @@ function ToggleGoToMethod(method) {
 
  }
 }
-
+/*
 function Slew() {
     // Set the appropriate values on the message object
     console.log("Je vybrána metoda: "+GoToMethod)
@@ -95,17 +84,19 @@ function Slew() {
             MountMessage.name = "mount";
             MountMessage.type = "Slew";
             var radec = null
-            var URL = "/processing?coord={'typ':'AltAz2RaDec','alt':"+document.getElementById("MountControlAlt").value+", 'az':"+document.getElementById("MountControlAz").value+"}"
+            var URL = "/processing?coord={'typ':'AltAz2RaDec','alt':" + document.getElementById("MountControlAlt").value + ", 'az':" + document.getElementById("MountControlAz").value+"}"
             console.log(URL)
-            getJSON(URL,
-            function(err, data) {
-              console.log(err)
-              console.log(data)
-              radec = data
-              console.log(radec)
-              MountMessage.data = "{'ra':"+radec.ra+", 'dec':"+radec.dec+"}"
-              MountControl.publish(MountMessage);
+            getJSON(URL, function(err, data) {
+                console.log(err)
+                console.log(data)
+                radec = data
+                console.log(radec)
+                MountMessage.name = "mount";
+                MountMessage.type = "Slew";
+                MountMessage.data = "{'ra':"+radec.ra+", 'dec':"+radec.dec+"}"
+                MountControl.publish(MountMessage);
             });
+               
             break; 
         case 'RaDec':
             MountMessage.name = "mount";
@@ -119,7 +110,226 @@ function Slew() {
         default:         
             break; 
     }
+}*/
+
+function Sync() {
+    // Set the appropriate values on the message object
+    console.log("Je vybrána metoda: "+GoToMethod)
+    switch (GoToMethod) {
+        case 'AltAz':
+            MountMessage.name = "mount";
+            MountMessage.type = "Sync";
+            var radec = null
+            var URL = "/processing?coord={'typ':'AltAz2RaDec','alt':" + document.getElementById("MountControlAlt").value + ", 'az':" + document.getElementById("MountControlAz").value+"}"
+            console.log(URL)
+            getJSON(URL, function(err, data) {
+                console.log(err)
+                console.log(data)
+                radec = data
+                console.log(radec)
+                MountMessage.name = "mount";
+                MountMessage.type = "Sync";
+                MountMessage.data = "{'ra':"+radec.ra+", 'dec':"+radec.dec+"}"
+                MountControl.publish(MountMessage);
+            });
+               
+            break; 
+        case 'RaDec':
+            //MountMessage.name = "mount";
+            //MountMessage.type = "sync";
+            //MountMessage.data = "{'ra':"+document.getElementById("MountControlAlt").value+", 'dec':"+document.getElementById("MountControlAz").value+"}"
+            //MountControl.publish(MountMessage);
+            console.log("function sync")
+            sendServiceMsg('function','sync', "{'ra':"+document.getElementById("MountControlAlt").value+", 'dec':"+document.getElementById("MountControlAz").value+"}")
+            break; 
+        case 'Axis':
+            alert("metoda 'Axis' zatím není implementována")
+            break; 
+        default:         
+            break; 
+    }
 }
+
+
+//
+// Vytvoreni pripojeni pro servis k mount
+//****************************************
+
+ var mount_service = new ROSLIB.Service({
+    ros : ros,
+    name : '/arom/driver/mount/heq5',
+    serviceType : 'arom/DriverControl'
+  });
+
+function sync() {
+    //var type = "";
+    var out_name = "advSync";
+    var out_data = "";
+    switch (GoToMethod) {
+        case 'AltAz':
+            out_data = "\"{'type':'altaz','alt':"+document.getElementById("MountControlAlt").value+",'az':"+document.getElementById("MountControlAz").value+"}\""
+            break; 
+
+        case 'RaDec':
+            out_data = "\"{'type':'radec','ra':"+document.getElementById("MountControlAlt").value+",'dec':"+document.getElementById("MountControlAz").value+"}\""
+            break; 
+
+        case 'Axis':
+            alert("metoda 'Axis' zatím není implementována")
+            break; 
+
+        default:         
+            break; 
+    }
+
+    var request = new ROSLIB.ServiceRequest({
+        type : 'function',
+        name : out_name,
+        data : out_data,
+        validate:'',
+        check: '',
+        done: true
+    });
+
+    mount_service.callService(request, function(result) {
+        console.log('Funkce '
+          + mount_service.name
+          + ': '
+          + result);
+        console.log(result);
+        var data = eval(result.data)
+        console.log(data);
+    });
+}
+
+function slew() {
+    //var type = "";
+    var out_name = "advSlew";
+    var out_data = "";
+    switch (GoToMethod) {
+        case 'AltAz':
+            out_data = "\"{'type':'altaz','alt':"+document.getElementById("MountControlAlt").value+",'az':"+document.getElementById("MountControlAz").value+"}\""
+            break; 
+
+        case 'RaDec':
+            out_data = "\"{'type':'radec','ra':"+document.getElementById("MountControlAlt").value+",'dec':"+document.getElementById("MountControlAz").value+"}\""
+            break; 
+
+        case 'Axis':
+            alert("metoda 'Axis' zatím není implementována")
+            break; 
+
+        default:         
+            break; 
+    }
+
+    var request = new ROSLIB.ServiceRequest({
+        type : 'function',
+        name : out_name,
+        data : out_data,
+        validate:'',
+        check: '',
+        done: true
+    });
+
+    mount_service.callService(request, function(result) {
+        console.log('Funkce '
+          + mount_service.name
+          + ': '
+          + result);
+        console.log(result);
+        var data = eval(result.data)
+        console.log(data);
+    });
+}
+
+function tracking() {
+    var out_name = "advTracking";
+    var out_data = "";
+    var data_type = '0';
+    if (document.getElementById("track_toggle").checked == true){
+        data_type = document.getElementById("track_spd").value
+        $("#track_box").fadeIn();
+    }else{
+        data_type = '0'
+        $("#track_box").fadeOut();
+    }
+    out_data = "\"{'type':'"+data_type+"'}\""
+
+    var request = new ROSLIB.ServiceRequest({type:'function', name:out_name, data:out_data, validate:'', check:'', done: true});
+
+    mount_service.callService(request, function(result) {
+        console.log('Funkce ' + mount_service.name + ': ');
+        console.log(result);
+        var data = eval(result.data)
+        console.log(data);
+    });
+}
+
+
+function getAltAz() {
+    var request = new ROSLIB.ServiceRequest({
+        type : 'function',
+        name : 'getPosition',
+        data : '\'JSON_ALL\'',
+        validate:'',
+        check: '',
+        done: true
+    });
+
+
+    mount_service.callService(request, function(result) {
+        console.log('Result for service call on '
+          + mount_service.name
+          + ': '
+          + result);
+        console.log(result);
+        var data = eval(result.data)
+        //$.("_ra-position")  = data.ra
+        //$.("_dec-position") = data.dec
+        console.log(data);
+        document.getElementById('_ra-position').value = data[0];
+        document.getElementById('_dec-position').value = data[1];
+        document.getElementById('_alt-position').value = data[2];
+        document.getElementById('_az-position').value = data[3];
+
+    });
+}
+var interval = setInterval(getAltAz, 1000);
+
+
+
+function sendServiceMsg(type, name, data) {
+    var request = new ROSLIB.ServiceRequest({
+        type : type,
+        name : name,
+        data : data,
+        validate:'',
+        check: '',
+        done: true
+    });
+
+    mount_service.callService(request, function(result) {
+        console.log('Result for srv '
+          + mount_service.name
+          + ': '
+          + result);
+        console.log(result);
+    });
+}
+
+/*                                                 Takto se to pouzije
+  var request = new ROSLIB.ServiceRequest({
+    name : 'name',
+    type : 'type'
+  });
+
+  mount_service.callService(request, function(result) {
+    console.log('Result for service call on '
+      + mount_service.name
+      + ': '
+      + result);
+  });*/
 
 
 /*
@@ -151,6 +361,7 @@ MountLocationUpdate.subscribe(function(message) {
   console.log('Received message ' + listener.name + ': ' + message);
 }); */
 
+
   // Subscribing to a Topic
   // ----------------------
 
@@ -170,9 +381,178 @@ MountLocationUpdate.subscribe(function(message) {
   });
 
 </script>
-<script src="/virtualsky-0.6.2.min.js"></script>
+
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#state">State</a></li>
+  <li><a data-toggle="tab" href="#planetarium">SkyMap</a></li>
+  <li><a data-toggle="tab" href="#controll">Controll</a></li>
+</ul>
+<div class="tab-content">
+<!--   PRVNÍ ZÁLOŽKA -->
+<div id="home" class="tab-pane fade in active">
+<div id="row">
+
+<div class="col-sm-6"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Mount status</div> <div class="panel-body">
+        <div id="row">
+            <div class="form-group col-sm-6">
+                <label>RA</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="_ra-position" ng-model="vm.message.angular_velocity.z" value="No data" disabled ng-readonly>
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>DEC</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="_dec-position" ng-model="vm.message.angular_velocity.z" value="No data" disabled  ng-readonly>
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>ALT</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="_alt-position" ng-model="vm.message.angular_velocity.z" value="No data" disabled  ng-readonly>
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>AZ</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="_az-position" ng-model="vm.message.angular_velocity.z" value="No data" disabled ng-readonly>
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>Axis 1</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="_ax1-position" ng-model="vm.message.angular_velocity.z" value="NotImplementedError" disabled ng-readonly>
+                  <span class="input-group-addon">Ticks</span>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label>Axis 2</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="_ax2-position" ng-model="vm.message.angular_velocity.z" value="NotImplementedError" disabled ng-readonly>
+                  <span class="input-group-addon">Ticks</span>
+                </div>
+            </div>
+        </div>
+</div></div></div>
+
+<div class="col-sm-6"><div class="panel arom_panel panel-default"> <div class="panel-heading">Mount status</div> <div class="panel-body">
+    <div id="planetarium" style=" height: 400px;" class="span12 embed-responsive-1by1"></div>
+</div></div></div>
+
+<div class="col-sm-12"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Actual map</div> <div class="panel-body" style="padding: 0px;">
+<div id="planetariumControl" style="width:100%;height:500px;" class="embed-responsive-16by10"></div>
+  </div> </div> </div>
+
+<div class="col-sm-6"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Mount control</div> <div class="panel-body">
+          <div id="row">
+            <div class="btn-group btn-group-justified">
+                <div class="btn-group">
+                    <button type="button" id="mount_btn_control_radec" class="btn col-sm-3" onclick="ToggleGoToMethod('RaDec')">Ra/Dec</button>
+                </div>
+                <div class="btn-group">
+                    <button type="button" id="mount_btn_control_hadec" class="btn disabled col-sm-3" onclick="ToggleGoToMethod('HaDec')" disabled>Ha/Dec</button>
+                </div>
+                <div class="btn-group">
+                    <button type="button" id="mount_btn_control_altaz" class="btn btn-primary col-sm-3" onclick="ToggleGoToMethod('AltAz')">Alt/Az</button>
+                </div>
+                <div class="btn-group">
+                    <button type="button" id="mount_btn_control_axis" class="btn disabled col-sm-3" onclick="ToggleGoToMethod('Axis')" disabled>Axis 1/ Axis 2</button>
+              </div>
+            </div>
+            <div class="form-group col-sm-6">
+                <label id="MountControlAlt_label">ALT</label>
+                <div class="input-group">
+                  <input id="MountControlAlt" type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+            <div class="form-group col-sm-6">
+                <label id="MountControlAz_label">AZ</label>
+                <div class="input-group">
+                  <input id="MountControlAz" type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
+                  <span class="input-group-addon">Deg</span>
+                </div>
+            </div>
+
+
+            <div class="col-sm-12 btn-group dropup">
+                <button type="button" class="btn btn-default btn-primary" type="submit" onclick="slew()">Slew</button>
+                <button type="button" class="btn btn-default btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a onclick="sync()">NotImplemented</a></li>
+                    <li><a onclick="sync()">Sync</a></li>
+                </ul>
+            </div>
+
+            <div class="col-sm-12 btn-group dropup">
+                <div class="checkbox">
+                    <label><input type="checkbox" value="" onclick="tracking()" id="track_toggle">Tracking</label>
+                </div>
+                <div id="track_box">
+                    <label for="track_spd">Tracking speed</label>
+                    <select class="form-control" id="track_spd" onclick="tracking()">
+                        <option>Sidreal</option>
+                        <option>Solar</option>
+                        <option>Moon</option>
+                        <option disabled>Own</option>
+                    </select>
+                </div>
+                <div class="checkbox disabled">
+                    <label><input type="checkbox" value="" disabled>Option 3</label>
+                </div>
+            </div>
+            
+        
+</div> </div> </div>
+
+  <div class="col-sm-6"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Mount control</div> <div class="panel-body">
+          <div id="row">
+          <table>
+            <tr><td></td><td><button type="button" class="btn btn-default glyphicon-circle-arrow-up"></button></td><td></td></tr>
+            <tr><td><button type="button" class="btn btn-default glyphicon glyphicon-triangle-left"></button></td><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-circle-arrow-right"></button></td></tr>
+            <tr><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-circle-arrow-down"></button></td><td></td></tr>
+          </table>
+          </div>
+</div> </div> </div>
+
+
+  <div class="col-sm-6"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Mount control</div> <div class="panel-body">
+
+	<button id="sendMsg" type="button" onclick="pubMessage()">Publish Message</button>
+
+	<div id="feedback"></div>
+</div> </div> </div>
+
+</div>
+
+<!--   DRUHÁ ZÁLOŽKA -->
+  </div> <div id="menu1" class="tab-pane fade">
+    <h3>Menu 1</h3>
+    <p>Some content in menu 1.</p>
+
+
+  </div> <div id="menu2" class="tab-pane fade">
+    <h3>Menu 2</h3>
+    <p>Some content in menu 2.</p>
+  </div>
+</div>
+
+{% end %}{% block last %}
+
 <script type="text/javascript">
-<!--
     $(document).ready(function(){
         planetarium = $.virtualsky({
                     id:'planetarium',
@@ -209,159 +589,21 @@ MountLocationUpdate.subscribe(function(message) {
 
                   });
     });
-// -->
 </script>
 <script type="text/javascript">
+  // ===========================
+  $(function(){
+    $('.arom_panel').lobiPanel({
+      sortable: true,
+      close: false,
+      editTitle: false
 
-  
-
-</script>
-
-{% end %}{% block container %}
-<ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#state">State</a></li>
-  <li><a data-toggle="tab" href="#planetarium">SkyMap</a></li>
-  <li><a data-toggle="tab" href="#controll">Controll</a></li>
-</ul>
-<div class="tab-content">
-<!--   PRVNÍ ZÁLOŽKA -->
-<div id="home" class="tab-pane fade in active">
-<div id="row">
-
-<div class="col-sm-6"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Mount status</div> <div class="panel-body">
-        <div id="row">
-            <div class="form-group col-sm-6">
-                <label>RA</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" id="_ra-position" ng-model="vm.message.angular_velocity.z" value="No data" ng-readonly>
-                  <span class="input-group-addon">Deg</span>
-                </div>
-            </div>
-
-            <div class="form-group col-sm-6">
-                <label>DEC</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" id="_dec-position" ng-model="vm.message.angular_velocity.z" value="No data" ng-readonly>
-                  <span class="input-group-addon">Deg</span>
-                </div>
-            </div>
-
-            <div class="form-group col-sm-6">
-                <label>ALT</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" id="_alt-position" ng-model="vm.message.angular_velocity.z" value="No data" ng-readonly>
-                  <span class="input-group-addon">Deg</span>
-                </div>
-            </div>
-
-            <div class="form-group col-sm-6">
-                <label>AZ</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" id="_az-position" ng-model="vm.message.angular_velocity.z" value="No data" ng-readonly>
-                  <span class="input-group-addon">Deg</span>
-                </div>
-            </div>
-
-            <div class="form-group col-sm-6">
-                <label>Axis 1</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" id="_ax1-position" ng-model="vm.message.angular_velocity.z" value="NotImplementedError" ng-readonly>
-                  <span class="input-group-addon">Ticks</span>
-                </div>
-            </div>
-
-            <div class="form-group col-sm-6">
-                <label>Axis 2</label>
-                <div class="input-group">
-                  <input type="number" class="form-control" id="_ax2-position" ng-model="vm.message.angular_velocity.z" value="NotImplementedError" ng-readonly>
-                  <span class="input-group-addon">Ticks</span>
-                </div>
-            </div>
-        </div>
-</div></div></div>
-
-<div class="col-sm-6"><div class="panel arom_panel panel-default"> <div class="panel-heading">Mount status</div> <div class="panel-body">
-    <div id="planetarium" style=" height: 400px;" class="span12 embed-responsive-1by1"></div>
-</div></div></div>
-
-<div class="col-sm-12"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Actual map</div> <div class="panel-body" style="padding: 0px;">
-<div id="planetariumControl" style="width:100%;height:500px;" class="embed-responsive-16by10"></div>
-  </div> </div> </div>
-
-<div class="col-sm-6"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Mount control</div> <div class="panel-body">
-          <div id="row">
-            <div class="btn-group col-sm-12">
-              <button type="button" id="mount_btn_control_radec" class="btn col-sm-3" onclick="ToggleGoToMethod('RaDec')">Ra/Dec</button>
-              <button type="button" id="mount_btn_control_hadec" class="btn disabled col-sm-3" onclick="ToggleGoToMethod('HaDec')" disabled>Ha/Dec</button>
-              <button type="button" id="mount_btn_control_altaz" class="btn btn-primary col-sm-3" onclick="ToggleGoToMethod('AltAz')">Alt/Az</button>
-              <button type="button" id="mount_btn_control_axis" class="btn disabled col-sm-3" onclick="ToggleGoToMethod('Axis')" disabled>Axis 1/ Axis 2</button>
-            </div>
-            <div class="form-group col-sm-6">
-                <label id="MountControlAlt_label">ALT</label>
-                <div class="input-group">
-                  <input id="MountControlAlt" type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
-                  <span class="input-group-addon">Deg</span>
-                </div>
-            </div>
-            <div class="form-group col-sm-6">
-                <label id="MountControlAz_label">AZ</label>
-                <div class="input-group">
-                  <input id="MountControlAz" type="number" class="form-control" ng-model="vm.message.angular_velocity.z" ng-readonly="vm.isSubscribing">
-                  <span class="input-group-addon">Deg</span>
-                </div>
-            </div>
-            <button class="btn col-sm-12 btn-primary" type="submit" onclick="Slew()">Slew</button>
-          </div>
-</div> </div> </div>
-
-  <div class="col-sm-6"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Mount control</div> <div class="panel-body">
-          <div id="row">
-          <table>
-            <tr><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-search"></button></td><td></td></tr>
-            <tr><td><button type="button" class="btn btn-default glyphicon glyphicon-triangle-left"></button></td><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-circle-arrow-right"></button></td></tr>
-            <tr><td></td><td><button type="button" class="btn btn-default glyphicon glyphicon-circle-arrow-down"></button></td><td></td></tr>
-          </table>
-          </div>
-</div> </div> </div>
-
-
-  <div class="col-sm-6"> <div class="panel arom_panel panel-default"> <div class="panel-heading">Mount control</div> <div class="panel-body">
-
-	<button id="sendMsg" type="button" onclick="pubMessage()">Publish Message</button>
-
-	<div id="feedback"></div>
-</div> </div> </div>
-
-</div>
-
-<!--   DRUHÁ ZÁLOŽKA -->
-  </div> <div id="menu1" class="tab-pane fade">
-    <h3>Menu 1</h3>
-    <p>Some content in menu 1.</p>
-
-
-  </div> <div id="menu2" class="tab-pane fade">
-    <h3>Menu 2</h3>
-    <p>Some content in menu 2.</p>
-  </div>
-</div>
-
-
-
-
-
-
-{% end %}{% block last %}
-<script type="text/javascript">
-
-   $(function(){
-        $('.arom_panel').lobiPanel({
-            sortable: true,
-            close: false,
-            editTitle: false
-            
-        });
     });
+  });
 </script>
+
+
+
+
 
 {% end %}

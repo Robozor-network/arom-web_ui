@@ -8,18 +8,18 @@
   }); 
 
     ros.on('connection', function() {
-     var fbDiv = document.getElementById('feedback');
-     fbDiv.innerHTML += "<p>Connected to websocket server.</p>";
+     //var fbDiv = document.getElementById('feedback');
+     //fbDiv.innerHTML += "<p>Connected to websocket server.</p>";
  });
 
    ros.on('error', function(error) {
-    var fbDiv = document.getElementById('feedback');
-    fbDiv.innerHTML += "<p>Error connecting to websocket server.</p>";
+    //var fbDiv = document.getElementById('feedback');
+    //fbDiv.innerHTML += "<p>Error connecting to websocket server.</p>";
 });
 
    ros.on('close', function() {
-    var fbDiv = document.getElementById('feedback');
-    fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
+    //var fbDiv = document.getElementById('feedback');
+    //fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
  });
 
   var MountControl = new ROSLIB.Topic({
@@ -97,5 +97,27 @@ function pubMessage() {
   </a>
 </div>
 
+    <script type="text/javascript">
+        if (getCookie("setting_alert_sound") == null){
+            setCookie("setting_alert_sound", true);
+        }
+        if (getCookie("setting_alert_fatal") == null){
+            setCookie("setting_alert_fatal", true);
+        }
+        if (getCookie("setting_alert_error") == null){
+            setCookie("setting_alert_error", true);
+        }
+        if (getCookie("setting_alert_warn") == null){
+            setCookie("setting_alert_warn", false);
+        }
+        if (getCookie("setting_alert_info") == null){
+            setCookie("setting_alert_info", false);
+        }
+        if (getCookie("setting_alert_debug") == null){
+            setCookie("setting_alert_debug", false);
+        }
 
+    </script>
+
+{% end %}{% block last %}
 {% end %}
