@@ -36,7 +36,7 @@
 </div></div>
 
 <div class="panel arom_panel_obs panel-default" id="row" > <div class="panel-heading">Graph</div> <div class="panel-body" id="" style="padding: 0px;">
-    <div id="container" style="height: 400px; min-width: 310px; padding: 0px; " class="col-sm-12"></div>
+    <div id="container" style="height: {{400*5}}px; min-width: 310px; padding: 0px; " class="col-sm-12"></div>
 
 </div></div>
 <!-- Konec panelu-->
@@ -105,7 +105,38 @@ $("#panel_inner_tree").load("/observatory/cfg/");
 <script type="text/javascript">
 $(function () {
     $.getJSON('/observatory/weather/datatable/?type=json&data=weather&sens=2', function (data) {
+      var data0 = [],
+      {% set sql_groups = _sql('SELECT sensors_id, sensor_name, sensor_quantity_name, sensor_quantity_mark, sensor_data_type FROM AROM.sensors WHERE sensors_id > 1 GROUP BY sensor_data_type;', read=True) %}
+      {% set sql_series = _sql('SELECT sensors_id, sensor_name, sensor_quantity_name, sensor_quantity_mark, sensor_data_type FROM AROM.sensors WHERE sensors_id > 1;', read=True) %}
+      {% for row in sql_series %}
+        {{row[1]}} = [],
+      {% end %}
+      {% set sql_groups_link={}%}
+      {% set n = 0 %}
+      {% for row in sql_groups %}
+        {% set sql_groups_link[row[4]] = n %}
+        {% set n += 1 %}
+      {% end %}
+
+      dataLength = data.length,
+            
+      i = 0
+
+      for (i; i < dataLength; i += 1) {
+          switch(data[i][2]) {
+              {% for row in sql_series %}
+                case {{row[0]}}:
+                  {{row[1]}}.push([data[i][0], data[i][1]])
+                  break;
+              {% end %}
+              
+              default:
+                  break;
+          }
+      }
+
         $('#container').highcharts('StockChart', {
+
             rangeSelector : {
                 selected : 1,
                 buttons: [{
@@ -145,10 +176,6 @@ $(function () {
                 }]
             },
 
-            series : [{
-                name : 'AWS_ambient_temp_2m',
-                data : data,
-            }],
             xAxis: {
               type: 'datetime',
               ordinal: false,
@@ -159,13 +186,90 @@ $(function () {
               title: {
                   text: 'Date'
               }
-            }, 
+            },
+            
+            yAxis: [
+              {% for i, row in list(enumerate(sql_groups)) %}
+                  {
+                    title: {
+                        text: '{{row[4]}}'
+                    },
+                    top: '{{(100/len(sql_groups)+1)*(i)}}%',
+                    height: '{{(100/len(sql_groups))-2}}%',
+                    lineWidth : 1,
+                    tooltip: {
+                        valueDecimals: 2
+                    }
+                  },
+              {% end %}
+
+/*
+              {
+                title: {
+                    text: 'Teplota'
+                },
+                height: '{{100/3-2}}%',
+                lineWidth: 2
+            }, {
+                title: {
+                    text: 'Volume'
+                },
+                top: '{{(100/3)*(2-1)}}%',
+                height: '{{100/3-2}}%',
+                offset: 0,
+                lineWidth: 2
+            }, {
+                title: {
+                    text: 'wind'
+                },
+                top: '{{(100/3)*(3-1)}}%',
+                height: '{{100/3-2}}%',
+                offset: 0,
+                lineWidth: 2
+            },*/],
+
+
+            series : [
+              {% for i, row in list(enumerate(sql_series)) %}
+                  {
+                    name : '{{row[1]}}',
+                    data : {{row[1]}},
+                    yAxis: {{sql_groups_link[row[4]]}},
+                  },
+              {% end %}
+
+              /*{
+                name : 'AWS_2',
+                data : data0,
+            },{
+                name : 'AWS_8',
+                data : data1,
+            },{
+                name : 'AWS_9',
+                data : data2,
+                yAxis: 1,
+            },{
+                name : 'AWS_aououeo',
+                data : data3,
+                yAxis: 2,
+            },{
+                name : 'AWS_aououeo',
+                data : data4,
+            },{
+                name : 'AWS_aououeo',
+                data : data5,
+            }*/], 
             legend: {
                 verticalAlign: 'middle',
                 borderWidth: 1
             },credits: {
                 enabled: false
             },
+
+            chart: {
+                zoomType: 'xy'
+            },
+
         });
     });
 });
@@ -202,6 +306,18 @@ $(function () {
     $("#panel_inner_tree").load("/observatory/cfg/"); 
 
 </script>
+
+{% for i, row in list(enumerate(sql_series)) %}
+                  {{i}} -- {{row}}<br>
+              {% end %}
+
+{% for i, row in list(enumerate(sql_groups)) %}
+                  {{i}} -- {{row}}<br>
+              {% end %}
+
+{{ _sql('SELECT sensors_id, sensor_name, sensor_quantity_name, sensor_quantity_mark, sensor_data_type FROM AROM.sensors WHERE sensors_id > 1 AND sensor_data_type = \''+'temp'+'\';')[0][0]}}
+
+{{repr(sql_groups_link)}}
 
 {% end %}
 

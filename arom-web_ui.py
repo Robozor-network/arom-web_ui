@@ -76,10 +76,10 @@ class Obs_weather_datatable(web.RequestHandler):
         arg_sens = self.get_argument('sens', 0)
         print arg_type, arg_data, "---------"
         if arg_data == 'weather' and arg_type == 'json':
-            data = _sql('SELECT date, avg(value) from weather WHERE sensors_id = %i GROUP BY date div (60*10) ORDER BY date;' %(int(arg_sens)))
-            self.write('[\n\r['+str(float(data[0][0])*1000)+','+str(round(float(data[0][1]),3))+']')
+            data = _sql('SELECT date, avg(value), sensors_id from weather GROUP BY date div (60*10), sensors_id  ORDER BY date;')
+            self.write('[\n\r['+str(float(data[0][0])*1000)+','+str(round(float(data[0][1]),3))+','+str(round(float(data[0][2]),3))+']')
             for row in data:
-                self.write(',['+str(float(row[0])*1000)+','+str(round(float(row[1]),3))+']\n\r')
+                self.write(',['+str(float(row[0])*1000)+','+str(round(float(row[1]),3))+','+str(round(float(row[2]),3))+']\n\r')
                 #sout.append([float(row[0]), float(row[1])])
             self.finish('\n\r]')
 

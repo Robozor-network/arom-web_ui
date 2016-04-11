@@ -244,7 +244,7 @@ function slew() {
 }
 
 function tracking() {
-    var out_name = "advTracking";
+    var out_name = "advTrack";
     var out_data = "";
     var data_type = '0';
     if (document.getElementById("track_toggle").checked == true){
@@ -501,20 +501,19 @@ MountLocationUpdate.subscribe(function(message) {
                 <div class="checkbox">
                     <label><input type="checkbox" value="" onclick="tracking()" id="track_toggle">Tracking</label>
                 </div>
-                <div id="track_box">
+                <div id="track_box" style="display: none;">
                     <label for="track_spd">Tracking speed</label>
                     <select class="form-control" id="track_spd" onclick="tracking()">
-                        <option>Sidreal</option>
-                        <option>Solar</option>
-                        <option>Moon</option>
-                        <option disabled>Own</option>
+                        <option>sidreal</option>
+                        <option>solar</option>
+                        <option>moon</option>
+                        <option disabled>custom</option>
                     </select>
                 </div>
                 <div class="checkbox disabled">
                     <label><input type="checkbox" value="" disabled>Option 3</label>
                 </div>
             </div>
-            
         
 </div> </div> </div>
 
