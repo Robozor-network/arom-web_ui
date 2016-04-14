@@ -36,7 +36,7 @@
 </div></div>
 
 <div class="panel arom_panel_obs panel-default" id="row" > <div class="panel-heading">Graph</div> <div class="panel-body" id="" style="padding: 0px;">
-    <div id="container" style="height: {{400*5}}px; min-width: 310px; padding: 0px; " class="col-sm-12"></div>
+    <div id="container" style="height: {{400*2}}px; min-width: 310px; padding: 0px; " class="col-sm-12"></div>
 
 </div></div>
 <!-- Konec panelu-->
@@ -102,8 +102,14 @@ $("#panel_inner_tree").load("/observatory/cfg/");
             });
 </script>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
 <script type="text/javascript">
 $(function () {
+    
+
     $.getJSON('/observatory/weather/datatable/?type=json&data=weather&sens=2', function (data) {
       var data0 = [],
       {% set sql_groups = _sql('SELECT sensors_id, sensor_name, sensor_quantity_name, sensor_quantity_mark, sensor_data_type FROM AROM.sensors WHERE sensors_id > 1 GROUP BY sensor_data_type;', read=True) %}
@@ -134,7 +140,7 @@ $(function () {
                   break;
           }
       }
-
+        $('#container').html('');
         $('#container').highcharts('StockChart', {
 
             rangeSelector : {
@@ -177,6 +183,9 @@ $(function () {
             },
 
             xAxis: {
+              events : {
+                  afterSetExtremes : newData,
+              },
               type: 'datetime',
               ordinal: false,
               dateTimeLabelFormats: { // don't display the dummy year
@@ -267,11 +276,38 @@ $(function () {
             },
 
             chart: {
-                zoomType: 'xy'
+                zoomType: 'y'
             },
 
         });
     });
+
+    function newData(e) {
+        console.log("afterSetExtremes")
+        console.log(e)
+        console.log($('#container'))
+
+        var chart = $('#container').highcharts();
+        
+        var currentExtremes = this.getExtremes(),
+            range = e.max - e.min;
+        //var chart = Highcharts.Chart("container");
+        
+
+
+
+        /*var chart = $('#container').highcharts();
+
+        chart.showLoading('Loading data from server...');
+        $.getJSON('https://www.highcharts.com/samples/data/from-sql.php?start=' + Math.round(e.min) +
+                '&end=' + Math.round(e.max) + '&callback=?', function (data) {
+
+            chart.series[0].setData(data);
+            chart.hideLoading();
+        });*/
+    
+    }
+
 });
 
 
