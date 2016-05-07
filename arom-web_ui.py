@@ -16,7 +16,14 @@ from tornado import options
 from tornado import web
 import json
 import ephem
+
+import std_msgs
+from std_msgs.msg import String
+from std_msgs.msg import Float32
+from arom.srv import *
+from arom.msg import *
 import rospy
+
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import Angle
@@ -32,6 +39,22 @@ observatory = EarthLocation(lat=49*u.deg, lon=14*u.deg, height=300*u.m)
 
 leftmenu = [["observatory", "observatory"],["Vec 1", "#"], ["Vec 2", "#"], ["Vec 3", "#"], ["Mount", "mount"]]
 leftmenu = [["observatory", "observatory"], ["Mount", "mount"]]
+
+rospy.logerr("wait_for_service /arom/NodeInfo")
+print "wait_for_service /arom/NodeInfo"
+rospy.wait_for_service('/arom/NodeInfo')
+#brain_nodeinfo = rospy.ServiceProxy('/arom/NodeInfo', arom.srv.NodeInfo)
+
+def get_devices():
+    try:    
+        print "ZIskavam tady data NodeInfo"
+        brain_nodeinfo = rospy.ServiceProxy('/arom/NodeInfo', arom.srv.NodeInfo)
+        resp1 = brain_nodeinfo(type = 'GetAllNodes')
+        print resp1
+        print "--------------------"
+        return resp1
+    except rospy.ServiceException, e:
+        print "Service call failed: %s"%e
 
 
 def _sql(query, read=False):
@@ -86,11 +109,11 @@ class Obs_weather_datatable(web.RequestHandler):
         elif arg_data == 'AROMconfig' and arg_type == 'json':
             pass
         else:
-            data = _sql('SELECT id, date, sensors_id, value FROM weather WHERE (date > %f)  GROUP BY sensors_id ORDER BY date DESC;' %(Time.now().unix-60))
+            data = _sql('SELECT weather.id, weather.date, weather.sensors_id, weather.value, sensors.sensor_name, sensors.sensor_quantity_mark FROM weather JOIN sensors ON weather.sensors_id = sensors.sensors_id WHERE (date > %f) GROUP BY sensors_id ORDER BY weather.sensors_id;' %(Time.now().unix-60))
             print data
             string = '<table class="table">'
             for row in data:
-                string += '<tr><td>'+datetime.datetime.fromtimestamp(float(row[1])).strftime('%Y-%m-%d %H:%M:%S')+'</td><td>'+str(row[2])+'</td><td>'+str(float(row[3]))+'</td></tr>'
+                string += '<tr><td>'+datetime.datetime.fromtimestamp(float(row[1])).strftime('%Y-%m-%d %H:%M:%S')+'</td><td>'+str(row[4])+'</td><td>'+str(row[2])+'</td><td>'+str(row[3])+" "+row[5]+'</td></tr>'
             string += '</table>'
             self.finish(string)
 
@@ -137,12 +160,23 @@ class processing(web.RequestHandler):
         else:
             rospy.logerr("Chyba v processing")
 
-
+class bootstrap(web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self, addres=None):
+        self.render("www/layout/dash/bootstrap.html", _sql=_sql, devices = get_devices())
+        
+class bootstrap_setting(web.RequestHandler):
+    def get(self):
+        self.render("www/layout/dash/bootstrap_setting.html", _sql=_sql, devices = get_devices())
+        
+        
 
 
 app = web.Application([
         (r'/', Overview),
-        (r'/index', Overview),
+        (r'/bootstrap/setting', bootstrap_setting),
+        (r'/bootstrap/(.*)', bootstrap_setting),
+        (r'/bootstrap', bootstrap),
         (r'/mount', Mount),
         (r'/observatory/weather/(.*)', Obs_weather_datatable),
         (r'/observatory/cfg/(.*)', Obs_config_diagram),
@@ -158,6 +192,7 @@ app = web.Application([
        
         (r'/(favicon.ico)', web.StaticFileHandler, {'path': '.www/media/favicon.ico'}),
         (r'/fonts/(.*)', tornado.web.StaticFileHandler,{"path": './www/fonts/' }),
+        (r"/lib/(.*)", tornado.web.StaticFileHandler,{"path": './www/lib/' }),
         (r"/(.*\.png)", tornado.web.StaticFileHandler,{"path": './www/media/' }),
         (r"/(.*\.jpg)", tornado.web.StaticFileHandler,{"path": './www/media/' }),
         (r"/(.*\.ogg)", tornado.web.StaticFileHandler,{"path": './www/media/' }),
