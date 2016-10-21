@@ -1,0 +1,20 @@
+
+.lcd1602-frame{
+	font-family: 'lcd_font';
+	letter-spacing: 3px;
+	font-size: 2em;
+	border: solid #2aaa2a 10px;
+	background-color: #2aaa2a;
+	width: 20ch;
+	margin: 0 auto; 
+}
+
+.lcd1602-textbox{
+	font-family: 'lcd_font';
+	letter-spacing: 3px;
+	padding: 10px;
+	background-color: #1A0101;
+	color: #ff5a5a;
+	width: 19ch;
+
+}

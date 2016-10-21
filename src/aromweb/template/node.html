@@ -1,0 +1,117 @@
+<script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+<script type="text/javascript" type="text/javascript">
+ 
+  // Connecting to ROS
+  // -----------------
+
+  var ros = new ROSLIB.Ros({
+    url : 'ws://192.168.1.109:9090'
+  });
+
+  ros.on('connection', function() {
+    console.log('Connected to websocket server.');
+  });
+
+  ros.on('error', function(error) {
+    console.log('Error connecting to websocket server: ', error);
+  });
+
+  ros.on('close', function() {
+    console.log('Connection to websocket server closed.');
+  });
+
+  var rcvDisplay = new ROSLIB.Topic({
+    ros : ros,
+    name : '/arom/node/lcdText',
+    messageType : 'std_msgs/String'
+  });
+
+  rcvDisplay.subscribe(function(msg) {
+      console.log(msg);
+      document.getElementById('lcd_text_field').innerHTML = msg.data.replace("\n", "<br>");
+  });
+
+</script>
+
+
+
+Test ........{{node}}<br>
+NodeParam....{{nodeParam}}
+
+<div class="row" id="node-container">
+
+
+</div>
+
+
+
+<script type="text/javascript">
+
+function lcd_text_send_ctrl(data){
+  console.log(msg);
+  var sendCtrl = new ROSLIB.Topic({
+    ros : ros,
+    name : '/arom/UI/buttons',
+    messageType : 'std_msgs/String'
+  });
+
+  var msg = new ROSLIB.Message({
+    data: data
+  });
+  console.log(msg)
+  sendCtrl.publish(msg);
+}
+
+    
+function lcd_text() {
+    console.log("blala");
+    var div = document.getElementById('node-container');
+    div.innerHTML = div.innerHTML + 
+    `
+
+    <div class="col-xs-6">
+    <div class="card">
+        <div class="card-header primary-color white-text">LCD view </div>
+        <div class="card-block">
+                    <div class="lcd1602-frame"><div class="lcd1602-textbox waves-effect" id="lcd_text_field">HELO arom LCD\nWait for new msg</div></div>
+        </div>
+    </div>
+        </div>
+
+    <div class="col-xs-3">
+    <div class="card">
+        <div class="card-header primary-color white-text">LCD control </div>
+        <div class="card-block"> 
+                    <table>
+                      <tr>
+                        <td></td>
+                        <td><a class="btn btn-primary waves-effect" onclick="lcd_text_send_ctrl('KEY_VOLUMEUP')"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></td>
+                      </tr>
+                      <tr>
+                        <td><a class="btn btn-primary waves-effect" onclick="lcd_text_send_ctrl('KEY_F2')"><i class="fa fa-arrow-left" aria-hidden="true"></i></a></td>
+                        <td><a class="btn btn-primary waves-effect" onclick="lcd_text_send_ctrl('KEY_F3')"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></a></td> 
+
+                      </tr>
+                      <tr>
+                        <td> </td> 
+                        <td><a class="btn btn-primary waves-effect" onclick="lcd_text_send_ctrl('KEY_VOLUMEDOWN')"><i class="fa fa-arrow-down" aria-hidden="true"></i></a></td>
+                        <td> </td>
+                      </tr>
+                    </table>
+        </div>
+        </div>
+    </div>
+
+    `;
+
+}
+
+</script>
+
+
+<script type="text/javascript">
+    {{nodeParam['type']}}();
+
+</script>
