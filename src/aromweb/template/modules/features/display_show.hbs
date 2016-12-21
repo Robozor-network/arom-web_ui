@@ -1,0 +1,25 @@
+    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-7 col-xl-6">
+        <div class="card">
+            <div class="card-header primary-color white-text">LCD show </div>
+
+            <div class="lcd1602-frame">
+                <div class="lcd1602-textbox waves-effect" id="lcd_text_field">HELO arom LCD\nWait for new msg</div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        var rcvDisplay = new ROSLIB.Topic({
+          ros : ros,
+          name : '/arom/node/lcdText',
+          messageType : 'std_msgs/String'
+        });
+
+        rcvDisplay.subscribe(function(msg) {
+            console.log(msg);
+            document.getElementById('lcd_text_field').innerHTML = msg.data.replace("\n", "<br>");
+        });
+        
+
+    </script>

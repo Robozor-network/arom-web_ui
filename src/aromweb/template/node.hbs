@@ -1,0 +1,89 @@
+{% extends "base.hbs" %}
+{% block head %}
+
+<script type="text/javascript" type="text/javascript">
+ 
+  // Connecting to ROS
+  // -----------------
+
+  if ($.cookie("rosbridge_url") == undefined){
+      $.cookie("rosbridge_url", "ws://arom-weather.local:9090");
+  }
+
+  var ros = new ROSLIB.Ros({
+    url : $.cookie("rosbridge_url")
+  });
+
+  ros.on('connection', function() {
+    console.log('Connected to websocket server.');
+  });
+
+  ros.on('error', function(error) {
+    $('#myModal').modal('show');
+    console.log('Error connecting to websocket server: ', error);
+  });
+
+  ros.on('close', function() {
+    jQuery('#modal').modal('show');
+    console.log('Connection to websocket server closed.');
+  });
+
+  //var rcvDisplay = new ROSLIB.Topic({
+  //  ros : ros,
+  //  name : '/arom/node/lcdText',
+  //  messageType : 'std_msgs/String'
+  //});
+
+  //rcvDisplay.subscribe(function(msg) {
+  //    console.log(msg);
+  //    document.getElementById('lcd_text_field').innerHTML = msg.data.replace("\n", "<br>");
+  //});
+
+    var rosTopic = new ROSLIB.Topic({
+      ros : ros,
+      name : '/rosout',
+      messageType : 'rosgraph_msgs/Log'
+    });
+
+
+    rosTopic.subscribe(function(msg) {
+      if (msg.level > 3){
+
+        Lobibox.notify('default', {
+            pauseDelayOnHover: true,
+            continueDelayOnInactiveTab: false,
+            msg: msg.msg,
+            title: msg.name
+        })
+      }
+    });
+
+
+
+</script>
+{% end %}
+
+{% block content %}
+<div class="alert alert-success" role="alert">
+
+	{{NodeParams}}
+
+	<ul>
+	{% for feature in NodeParams['feature'] %}
+	<li>{{feature}} >> {{NodeParams['feature'][feature]}}</li>
+	{%end%}
+	</ul>
+</div>
+
+{% for feature in NodeParams['feature'] %}
+<div>
+
+{% module NodeFeature(feature, NodeParams['feature'][feature]) %}
+
+
+</div>
+{%end%}
+
+
+
+{% end %}

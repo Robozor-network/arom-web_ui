@@ -1,0 +1,7 @@
+<div id="sidebar-wrapper">
+	<ul class="sidebar-nav">
+		{%for navItem in navItems%}
+			<li><a href="/node/{{navItem[1:]}}">{{navItem[1:]}}</a></li>
+		{%end%}
+	</ul>
+</div>

@@ -1,0 +1,71 @@
+
+<div class="col-xs-6 col-sm-6 col-md-5 col-lg-4 col-xl-3">
+<div class="card">
+    <div class="card-header primary-color white-text">Set gpio port</div>
+    <div class="card-block"> 
+
+{% for i, device in enumerate(eval(FeatureParams['devices'])) %}
+
+<div class="form-check">
+    <input class="form-check-input SocketCtrl" type="checkbox" data-toggle="toggle" value="" id="Socket{{len(eval(FeatureParams['devices']))-i-1}}" onclick="handleClick(this, '{{device}}')" {% if device == None %}disabled{% end %}> {{device}}
+</div>
+
+{% end %}
+
+</div>
+</div>
+
+<script type="text/javascript">
+    var rcvPorts = new ROSLIB.Topic({
+      ros : ros,
+      name : '/gpio/gpio_status',
+      messageType : 'std_msgs/String'
+    });
+
+    rcvPorts.subscribe(function(msg) {
+      console.log(msg);
+      var array = msg.data.split("");
+      for (var i = array.length - 1; i >= 0; i--) {
+        try {
+          var checkbox = document.getElementById('Socket'+String(i));
+          if (array[i] == '1'){
+            console.log(array[i], "set");
+            checkbox.checked = true;
+          }else{
+            console.log(array[i], "false");
+            checkbox.checked = false;
+          }
+        }
+        catch(err) {console.log(err, 'Socket'+String(i), document.getElementById('Socket'+String(i)))}
+      }
+    });
+
+    window.onbeforeunload = function(){
+      console.log("closing");
+      console.log(rcvPorts.unsubscribe());
+      delete rcvPorts;
+    };
+
+    function handleClick(cb, device) {
+      console.log("Clicked,"+device+" new value = " + cb.checked? 1 : 0);
+      var status
+
+      var sendCtrl = new ROSLIB.Topic({
+        ros : ros,
+        name : '/gpio/gpio_mount',
+        messageType : 'std_msgs/String'
+      });
+
+      var msg = new ROSLIB.Message({
+        data: device+" "+(cb.checked ? 1 : 0)
+      });
+      console.log(msg)
+      sendCtrl.publish(msg);
+
+      delete sendCtrl;
+      delete msg;
+    }
+
+
+
+</script>
