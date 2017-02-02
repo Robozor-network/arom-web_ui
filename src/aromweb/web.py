@@ -29,6 +29,18 @@ tornado.options.define("port", default=8888, help="port", type=int)
 tornado.options.define("debug", default=True, help="debug mode")
 
 
+class LoginHandler(base.BaseHandler):
+    def get(self):
+        self.write('<html><body><form action="/login" method="post">'
+                   'Name: <input type="text" name="name">'
+                   '<input type="submit" value="Prihlasit se">'
+                   '</form></body></html>')
+
+    def post(self):
+        self.set_secure_cookie("user", self.get_argument("name"))
+        self.redirect("/")
+
+
 class WebApp(tornado.web.Application):
 
     def __init__(self, config={}):
@@ -42,16 +54,18 @@ class WebApp(tornado.web.Application):
             (r"/", base.MainHandler),
             (r"/node/(.*)", base.NodeHandler),
             (r"/rosapi/publist/(.*)", rosHandlers.publish),
+            (r"/login", LoginHandler),
             #(r"/rosapi/(.*)", rosHandlers.NodeHandler),
             #(r"/ws/(.*)", websockets.PanWebSocket),
         ]
+        
         settings = dict(
-            cookie_secret="PANOPTES_SUPER_DOOPER_SECRET",
+            cookie_secret="necovelmimocanejvictajnyretezeckterynikdoneuhadneatrebaijednocisla1",
             #template_path=os.path.join(self._base_dir, "template"),
             template_path= "/home/odroid/repos/arom-web_ui/src/aromweb/template/",
             #static_path=os.path.join(self._base_dir, "static"),
             static_path= "/home/odroid/repos/arom-web_ui/src/aromweb/static/",
-            xsrf_cookies=True,
+            xsrf_cookies=False,
             name=name,
             server_url=server_url,
             site_title=name+" | AROM",

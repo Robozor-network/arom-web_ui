@@ -7,7 +7,7 @@
   // -----------------
 
   if ($.cookie("rosbridge_url") == undefined){
-      $.cookie("rosbridge_url", "ws://arom-weather.local:9090");
+      $.cookie("rosbridge_url", "ws://"+document.location.host+"/ws");
   }
 
   var ros = new ROSLIB.Ros({
@@ -26,18 +26,9 @@
   ros.on('close', function() {
     jQuery('#modal').modal('show');
     console.log('Connection to websocket server closed.');
+    alert('Connection to websocket server closed.');
   });
 
-  //var rcvDisplay = new ROSLIB.Topic({
-  //  ros : ros,
-  //  name : '/arom/node/lcdText',
-  //  messageType : 'std_msgs/String'
-  //});
-
-  //rcvDisplay.subscribe(function(msg) {
-  //    console.log(msg);
-  //    document.getElementById('lcd_text_field').innerHTML = msg.data.replace("\n", "<br>");
-  //});
 
     var rosTopic = new ROSLIB.Topic({
       ros : ros,

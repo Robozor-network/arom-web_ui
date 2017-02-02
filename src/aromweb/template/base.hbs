@@ -39,6 +39,7 @@
         Nastavení
       </a>
 
+
       <div class="dropdown-menu setting-simple" >
       <form>
         <div class="form-group">
@@ -61,6 +62,7 @@
 
 
           <div class="row">
+
               <div class="col-lg-12">
                 <div class="container">
                     {% block content %}{% end %}
@@ -70,6 +72,7 @@
           </div>
       </div>
   </div>
+
 
   {% include 'footer.hbs' %}
   <!-- <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script> -->
@@ -88,7 +91,7 @@
     }
 
     function resetCookie() {
-      $.cookie('rosbridge_url', 'ws://arom-weather.lan:9090/');
+      $.removeCookie('rosbridge_url');
       location.reload();
     }
     
@@ -110,5 +113,8 @@
     });
     {% block bottom %}{% end %}
   </script>
+
 </div></body>
 </html>
+
+
