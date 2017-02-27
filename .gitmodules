@@ -1,0 +1,12 @@
+[submodule "src/aromweb/static/PymlabChart"]
+	path = src/aromweb/static/PymlabChart
+	url = git@github.com:dabeng/OrgChart.git
+[submodule "src/aromweb/static/mockjax"]
+	path = src/aromweb/static/mockjax
+	url = git@github.com:jakerella/jquery-mockjax.git
+[submodule "src/aromweb/static/defiantJS"]
+	path = src/aromweb/static/defiantJS
+	url = git@github.com:hbi99/defiant.js.git
+[submodule "src/aromweb/static/js9"]
+	path = src/aromweb/static/js9
+	url = git@github.com:ericmandel/js9.git
