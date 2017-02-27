@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="/static/tether/css/tether.min.css">
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/static/lobibox/dist/css/lobibox.min.css">
+    <link rel="stylesheet" href="/static/lobibox/css/lobibox.css">
+    <link rel="stylesheet" href="/static/PymlabChart/dist/css/jquery.orgchart.css">
     <link rel="stylesheet" href="/static/css/simple-sidebar.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="shortcut icon" href="/static/media/favicon.ico">
@@ -17,6 +18,15 @@
     <script src="/static/js/roslib.js"></script>
     <script src="/static/js/jquery-3.1.1.min.js"></script>
     <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/mockjax/dist/jquery.mockjax.min.js"></script>
+
+    <!-- <script src="/static/lobibox/lib/jquery.1.11.min.js"></script> -->
+    <script src="/static/tether/js/tether.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/lobibox/js/lobibox.js"></script>
+    
+    <script src="/static/defiantJS/dist/defiant.min.js"></script>
+    <script src="/static/PymlabChart/dist/js/jquery.orgchart.js"></script>
 
   {% block head %}{% end %}
 </head>
@@ -47,7 +57,8 @@
           <input type="text" class="form-control" id="ws_addr" placeholder="rosbridge url" value="ws://arom-weather.local:9090/">
         <br>
         <a class="btn btn-primary" onclick="setCookie()">Set</a>
-        <a class="btn btn-secondary" onclick="resetCookie()" data-toggle="tooltip" data-html="true" data-placement="top" title="Set default <l>rosbridge</l> address">Reset</a>
+        <a class="btn btn-secondary" onclick="defaultCookie()" data-toggle="tooltip" data-html="true" data-placement="top" title="Set default <l>rosbridge</l> address">Default</a>
+        <a class="btn btn-secondary" onclick="resetCookie()" data-toggle="tooltip" data-html="true" data-placement="top" title="Set default <l>rosbridge</l> address">Earse</a>
         </div>
       </form>
       </div>
@@ -57,7 +68,8 @@
 </nav>
   <!-- </div> -->
 
-  <div id="page-content-wrapper">
+  <div class="container">
+  <br>
       <div class="container-fluid">
 
 
@@ -73,43 +85,40 @@
       </div>
   </div>
 
-
+  <div>
   {% include 'footer.hbs' %}
+  </div>
   <!-- <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script> -->
   
-  <!-- <script src="/static/lobibox/lib/jquery.1.11.min.js"></script> -->
-  <script src="/static/tether/js/tether.min.js"></script>
-  <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-  <script src="/static/lobibox/dist/js/lobibox.min.js"></script>
 
 
   <script type="text/javascript">
 
     function setCookie() {
-      $.cookie('rosbridge_url', $('#ws_addr').val());
+      //$.cookie('rosbridge_url', $('#ws_addr').val());
+      document.cookie = "rosbridge_url="+$('#ws_addr').val()+";";
+      location.reload();
+    }
+
+    function defaultCookie() {
+      //$.cookie('rosbridge_url', $('#ws_addr').val());
+      document.cookie = "rosbridge_url="+"ws://"+document.location.host+"/ws"+";";
       location.reload();
     }
 
     function resetCookie() {
-      $.removeCookie('rosbridge_url');
+      //$.removeCookie('rosbridge_url');
+      document.cookie = "rosbridge_url=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       location.reload();
     }
     
     $("#menu-toggle").click(function(e) {
-        console.log("Toggle menu");
         e.preventDefault();
         $("#wrapper").toggleClass("toggled");
-
-        Lobibox.notify('default', {
-            pauseDelayOnHover: true,
-            continueDelayOnInactiveTab: false,
-            msg: 'Lorem ipsum dolor sit amet hears farmer indemnity inherent.'
-        });
-
     });
 
     $( document ).ready(function() {
-       
+        document.getElementById('ws_addr').value = $.cookie("rosbridge_url")
     });
     {% block bottom %}{% end %}
   </script>

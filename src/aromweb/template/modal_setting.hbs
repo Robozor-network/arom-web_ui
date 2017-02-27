@@ -1,0 +1,94 @@
+
+
+    <div class="modal-header">
+        <h5 class="modal-title">Settings</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <div></div>
+        <div>
+
+          <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Co tady? vlastně takové malé ToDo!</h4>
+            <p>Takže nejdříve tady budou části, které umožní spouštět a zabíjet nody přimo z webu. To někdy může hodně pomoci :)</p>
+            <p>Pro "lepší" uživatele tady bude správa ostatních uživatelů.</p>
+          </div>
+            
+        </div>
+
+        <form>
+          <div class="form-group">
+            <label>Run node</label>
+              <div class="input-group">
+
+                    
+                <select class="custom-select" id="sel_start">
+                  <option value="">--Vyberte jeden nod--</option>
+                    {%for Item in sorted(['camera_astro_v4l.py', 'mount.py', 'gpio.py', 'irUI.py'])%}
+                        <option value='{{Item}}'>{{Item}}</option>
+                    {%end%}
+                </select>
+                <input type="text" class="form-control" placeholder="Parametry pro spuštění" id="name_start">
+                <div class="form-control btn btn-info" id="btn_start"> Start node</div>
+              </div>
+          </div>
+
+          <div class="form-group">
+            <label>Kill node</label>
+              <div class="input-group">
+                <select class="custom-select" id="sel_kill">
+                  <option value="">--Vyberte jeden nod--</option>
+                    {%for navItem in sorted(navItems)%}
+                        <option value='{{navItem}}'>{{navItem}}</option>
+                    {%end%}
+                </select>
+                <div class="form-control btn btn-info" id="btn_kill" > Kill node</div>
+              </div>
+            <small class="form-text text-muted">Při ukončení nodu můžete přijít o některá neuložená nastavení.</small>
+          </div>
+
+        </form>
+
+
+
+
+
+    </div>
+
+
+
+<script type="text/javascript">
+      
+
+  $(document).on('click', '#btn_kill', function(event) {
+      console.log(this.id);
+      console.log('http://'+window.location.host + '/api/node/kill' + document.getElementById('sel_kill').value )
+      $.get(
+        'http://'+window.location.host + '/api/node/kill' + document.getElementById('sel_kill').value,
+        {},
+        function(data) {
+           alert('Kill: ' + data + '\r' + 'Obnovte stránku');
+        }
+      );
+
+  });
+
+  $(document).on('click', '#btn_start', function(event) {
+      console.log(this.id);
+      console.log('http://'+window.location.host+'/api/node/start/' + document.getElementById('name_start').value )
+
+      $.get(
+        'http://'+window.location.host+'/api/node/start/' + document.getElementById('sel_start').value + document.getElementById('name_start').value,
+        {},
+        function(data) {
+           alert('Start: ' + data + '\r' + 'Pro načtení nodu obnovte stránku');
+        }
+      );
+
+  });
+
+
+</script>

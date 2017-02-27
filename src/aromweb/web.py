@@ -29,18 +29,6 @@ tornado.options.define("port", default=8888, help="port", type=int)
 tornado.options.define("debug", default=True, help="debug mode")
 
 
-class LoginHandler(base.BaseHandler):
-    def get(self):
-        self.write('<html><body><form action="/login" method="post">'
-                   'Name: <input type="text" name="name">'
-                   '<input type="submit" value="Prihlasit se">'
-                   '</form></body></html>')
-
-    def post(self):
-        self.set_secure_cookie("user", self.get_argument("name"))
-        self.redirect("/")
-
-
 class WebApp(tornado.web.Application):
 
     def __init__(self, config={}):
@@ -54,7 +42,12 @@ class WebApp(tornado.web.Application):
             (r"/", base.MainHandler),
             (r"/node/(.*)", base.NodeHandler),
             (r"/rosapi/publist/(.*)", rosHandlers.publish),
-            (r"/login", LoginHandler),
+            (r"/login", base.LoginHandler),
+            (r"/logout", base.LogoutHandler),
+            (r"/api/upload/(.*)", base.WebUpload),
+            (r"/api/getImage/(.*)", base.GetImage),
+            (r"/api/node/kill/(.*)", base.NodeKill),
+            (r"/api/node/start/(.*)", base.NodeStart),
             #(r"/rosapi/(.*)", rosHandlers.NodeHandler),
             #(r"/ws/(.*)", websockets.PanWebSocket),
         ]

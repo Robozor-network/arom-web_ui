@@ -1,0 +1,45 @@
+
+
+  <style type="text/css">
+      #centerdiv {
+      width: 100%;
+      margin-left: auto ;
+      margin-right: auto ;
+      }
+  </style>
+
+
+<div class="col-sm-12">
+    <div class="card">
+        <div class="card-header"><h3>Camera image</h3><span id="link"></span></div>
+		<img src="" id="img" style="width: 100%;"></img>
+	</div>
+</div>
+
+<div class="col-sm-12">
+	<div class="card">
+	    <!-- <div class="JS9Menubar"></div>
+	    <div class="JS9" style="width: 100%"></div>
+	    <div style="margin-top: 2px;">
+	    <div class="JS9Colorbar"></div> -->
+   	</div>
+</div>
+
+
+<script type="text/javascript">
+
+    var Image = new ROSLIB.Topic({
+      ros : ros,
+      name : '/arom/camera/image',
+      messageType : 'std_msgs/String'
+    });
+
+    Image.subscribe(function(msg) {
+        console.log(msg);
+        console.log("http://"+window.location.host+"/api/getImage/?image="+msg.data);
+        document.getElementById('link').innerHTML = "<a href=\"http://"+window.location.host+"/api/getImage/?image="+msg.data+"\"> image </a>";
+        document.getElementById("img").src="http://"+window.location.host+"/api/getImage/?image="+msg.data
+
+    });
+
+</script>

@@ -1,0 +1,102 @@
+<div class="col-sm-4">
+    <div class="card">
+        <h3 class="card-header">Camera controll</h3>
+        <div class="card-block">
+
+
+            <div class="form-group">
+                <label for="gain">Gain</label>
+                <div class="input-group">
+                    <input type="number" id="gain" class="form-control" min="4" max="63" step="0.1" value="50">
+                    <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button" id="btn_gain" ><i class="fa fa-upload" aria-hidden="true"></i></button>
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="exposure">Expousure</label>
+                <div class="input-group">
+                    <input type="number" id="exposure" class="form-control" min="1" max="300000" step="1" value="127">
+                    <span class="input-group-btn">
+                        <button class="btn btn-secondary" type="button" id="btn_exposure" ><i class="fa fa-upload" aria-hidden="true"></i></button>
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button class="btn btn-secondary" type="button" id="btn_capture" style="width: 100%;">Capture</button>
+            </div>
+
+            <div class="form-group">
+              <input type="checkbox" name="loop" id="chb_loop" checked> Loop
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+
+var sendCtrl = new ROSLIB.Topic({
+    ros : ros,
+    name : '/arom/camera/controll',
+    messageType : 'std_msgs/String'
+});
+
+
+
+    
+
+$('#btn_exposure').on('click', function() {
+    console.log("function, #btn_exposure");
+
+    var msg = new ROSLIB.Message({
+        data: 'setExpo ' + document.getElementById('exposure').value
+    });
+    sendCtrl.publish(msg);
+});
+
+$('#btn_gain').on('click', function() {
+    console.log("function, #btn_gain");
+
+    var msg = new ROSLIB.Message({
+        data: 'setGain ' + document.getElementById('gain').value
+    });
+    sendCtrl.publish(msg);
+});
+
+$('#btn_capture').on('click', function() {
+    console.log("function, #btn_gain");
+
+    var msg = new ROSLIB.Message({
+        data: 'capture'
+    });
+    sendCtrl.publish(msg);
+});
+
+$('#chb_loop').on('click', function() {
+    console.log("function, #btn_gain");
+    if (document.getElementById('chb_loop').checked) 
+        {
+            var msg = new ROSLIB.Message({
+                data: 'streamStart'
+            });
+            sendCtrl.publish(msg);
+
+        }else{
+            var msg = new ROSLIB.Message({
+                data: 'streamStop'
+            });
+            sendCtrl.publish(msg);
+
+        }
+
+});
+
+
+
+
+</script>

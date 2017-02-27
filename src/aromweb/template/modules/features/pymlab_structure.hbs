@@ -1,0 +1,306 @@
+{% import glob %}
+
+<div class="alert alert-danger" role="alert">
+    <b>SUPER!!! ... už to funguje díky této konfiguraci :)</b> - je to tak, že vykreslený graf je z JSONu, který je níže. Úplně dole si lze vybrat "presety". Ty pak červeným tlačítkem 'nahrát' do pymlabu a používat vybrané schéma :)
+</div>
+
+    <div class="form-group row">
+        <label for="chart-container" class="col-2 col-form-label">Pymlab wiring</label>
+        <div class="card">
+            <div class="card-block" style="padding: 0px;">
+                <div id="chart-container" style="width: 100%; min-height: 100%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="json" class="col-2 col-form-label">Device setting</label> 
+        <div class="col-12">
+            <textarea id="json" class="form-control" rows=10 disabled>Vyberte zařízení ze schématu výše
+            </textarea>
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <label for="json_whole" class="col-2 col-form-label">Whole schema</label> 
+        <div class="col-12"> <textarea id="json_whole" class="form-control" rows=50>{{open(FeatureParams['cfg'], 'r').read()}}</textarea>
+    </div></div>
+
+{%if current_user %} {% if current_user['level'] > 4%}
+        <div class="input-group">
+
+            <div class="input-group-btn">
+                <div class="btn-group" role="group" aria-label="Basic example">
+                    <button id="btn-save" type="button" class="btn btn-success">Save changes</button>
+                </div>
+            </div>
+
+            <div class="input-group-btn">
+                <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Existující nastavení
+                </button>
+                <div class="dropdown-menu">
+                    {% for file in glob.glob("/home/odroid/robozor/station/pymlab_presets/*.json")%}
+                        <a class="dropdown-item" id="{{file}}.json" onclick="LoadNewConfig('{{file}}')"> {{file}} </a>
+                    {% end %}
+                </div>
+            </div>
+
+
+            <input type="text" class="form-control" id="config_location" value="{{FeatureParams['cfg']}}">
+
+        </div>
+
+        <br>
+        <button type="button" class="btn btn-danger" id="btn-initPymlab" data-toggle="modal" data-target="#Modal_InitPymlab">
+          Init PyMLAB
+        </button>
+
+<!-- Modal - pro potvrzení při kliknutí na initPymlab -->
+        <div class="modal fade" id="Modal_InitPymlab" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="#pymlabModal">Inicializovat pymlab</h5>
+              </div>
+              <div class="modal-body">
+                Opravdu chceš inicializovat pymlab (ROSpymlabServer)? Můžeš tím rozbít fungující komunikaci se zařízeními a popřípadě použít špatné zapojení pymlabu.... Zkontroluj si to, prosím:)<br>
+
+                Máte vybraný soubor: (zatím tady nic není - proste ten, co je uplne dole v tom radku)
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zrušit</button>
+                <button type="button" class="btn btn-primary" id="btn-initPymlabAccepted">Inicializovat</button>
+              </div>
+            </div>
+          </div>
+        </div>
+{% end %}{% end %}
+
+
+<script type="text/javascript">
+'use strict';
+
+    (function($){
+
+        var $chart = $('.orgchart');
+        $('.orgchart').css('transform','');
+        $('.orgchart').addClass('noncollapsable')
+        $(function() {
+
+/*            var datasource = {
+                'name': 'Pymlab',
+                'title': 'AROM',
+                'children': [
+                { 'name': 'bus1',
+                  'device': 'smbus',
+                  'port': 1,
+                  'children': [
+                            {
+                                "name":           "AWS_humi",
+                                "type":           "sht31",
+                                "address":        0x44,
+                            },{
+                                "name":           "AWS_wind_s",
+                                "type":           "rps01",
+                                "address":        0x40,
+                            },{
+                                "name":           "AWS_temp_ref",
+                                "type":           "lts01",
+                                "address":        0x48,
+                            },{
+                                "name":           "AWS_wind_d",
+                                "type":           "mag01",
+                                "gauss":          0.88,
+                                "address":        0x1E,
+                            },{
+                                "name":           "AWS_press",
+                                "type":           "altimet01",
+                                "address":        0x60,
+                            },{
+                                "name":           "AWS_light",
+                                "type":           "isl03",
+                                "address":        0x10,
+                            },{
+                                "name":           "AWS_clouds",
+                                "type":           "thermopile01",
+                                "address":        0x5d,
+                            },{
+                                "name":           "StatusLCD",
+                                "type":           "i2clcd",
+                                "address":        0x27,
+                            }
+                      ]
+                    },
+                    { 'name': 'bus2',
+                      'device': 'serial',
+                      'port':'/dev/ttyUSB0',
+                      'children': [
+                            {
+                                "name":           "telescope_lts",
+                                "type":           "lts01",
+                                "address":        0x48
+                            },{ 
+                                "name":           "telescope_spi", 
+                                "type":           "i2cspi",
+                                "address":        0x2E
+                            },
+                            { 
+                                "name":            "gpio_mount",
+                                "type":            "I2CIO_TCA9535",
+                                "address":         0x26
+                            }
+
+                      ]
+                    },
+                    { 'name': 'testovaci',
+                      'device': 'test',
+                      'port': 'test',
+                      'children': [
+                            {   
+                                "name": "i2chub TESTOVACI",
+                                "type": "i2chub",
+                                "address": 0x70,
+
+                                "children": [
+                                    {
+                                        "name": "mag",
+                                        "type": "mag01",
+                                        "gauss": 1.3,
+                                        "channel": 2,
+                                    },
+                                    {
+                                        "name":           "telescope_lts2",
+                                        "type":           "lts01",
+                                        "address":        0x48,
+                                        "channel":        1,
+                                    },{ 
+                                        "name":           "spi_nekde_uplne_jinde", 
+                                        "type":           "i2cspi",
+                                        "address":        0x2E,
+                                        "channel":        3,
+                                    },
+                                    { 
+                                        "name":            "gpio",
+                                        "type":            "I2CIO_TCA9535",
+                                        "address":         0x26,
+                                        "channel":         2,
+                                    }
+                                ],
+                            },
+                      ]
+
+                    }
+                  ]
+                };*/
+            
+            var datasource = JSON.parse(document.getElementById("json_whole").value);
+
+
+            $('#chart-container').orgchart({
+                'data' : datasource,
+                'depth': 10,
+                'nodeContent': 'title',
+                'pan': true,
+                'exportButton': false,
+                'exportFilename': 'PymlabWiringAROM',
+                'exportFileextension': 'pdf',
+                //'direction': 'l2r',
+                'createNode': function($node, data) {
+                    //console.log($node)
+                    //console.log(data)
+                    $node[0].id = data['name'];
+                    $node[0].param = data;
+                }
+            })
+
+            .on('click', '.node', function() {
+
+                var $this = $(this);
+                document.getElementById('json').innerHTML = JSON.stringify($('#chart-container').orgchart('getNodeParams', $this.find('.title')), undefined, 4);
+
+            })
+
+        });
+    })(jQuery);
+
+
+    function ExportSchema(){
+        var hierarchy = $('#chart-container').orgchart('getHierarchy', "param");
+        document.getElementById("json_whole").value = JSON.stringify(hierarchy, null, 4);
+        return hierarchy
+    }
+
+
+    $('#btn-export').on('click', function() {
+        var hierarchy = $('#chart-container').orgchart('getHierarchy', "param");
+        document.getElementById("json_whole").value = JSON.stringify(hierarchy, null, 4);
+    });
+
+
+    $('#btn-save').on('click', function(){
+        console.log("zmáčknuto btn save");
+        $.ajax({
+            type: 'PUT',
+            dataType: 'json',
+            url: "/api/upload/"+document.getElementById("config_location").value,
+            headers: {"X-HTTP-Method-Override": "PUT"},
+            data: document.getElementById("json_whole").value
+        });
+        location.reload();
+    });
+
+    $('#btn-initPymlabAccepted').on('click', function(){
+        console.log("zmacknuto");
+
+        var pymlab_init = new ROSLIB.Service({
+            ros : ros,
+            name : '/pymlab_init',
+            serviceType : 'arom/PymlabInit'
+        });
+
+        var request = new ROSLIB.ServiceRequest({
+            config: document.getElementById("config_location").value,
+            default : 1
+        });
+
+        pymlab_init.callService(request, function(result) {
+            console.log('Result for service call on ' + pymlab_init.name + ': '+ result.sum);
+        });
+          
+    });
+
+    $('#json_whole').on('change',function(){
+
+    });
+
+    function LoadNewConfig(file){
+        document.getElementById("config_location").value = file;
+
+        var param_pymlab_cfg = new ROSLIB.Param({
+          ros : ros,
+          name: '/arom/node/pymlab_node/feature/pymlab_structure/cfg'
+        });
+        param_pymlab_cfg.set(file);
+        location.reload();
+    }
+
+    function IsJsonValid(str) {
+        try {
+            JSON.parse(str);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+
+    $( document ).ready(function() {
+        //ExportSchema();
+        //document.getElementById("json_whole").value = JSON.stringify(JSON.parse(document.getElementById("json_whole").value), undefined, 4);
+    });
+
+
+
+</script>

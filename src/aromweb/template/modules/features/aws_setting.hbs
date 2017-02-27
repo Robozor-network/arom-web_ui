@@ -1,0 +1,170 @@
+{% import rospy %}
+{% import glob %}
+
+<!-- <div class="alert alert-danger" role="alert">
+    Tyto nastavovátka ještě nefungují, ale můžeš zkusit upravovat JSON níže Návod ještě není přípraven :-( Ale klidně, když budeš chtít, tak mi s tím můžeš pomoct...  Ale připravené je to tak, že celý json se bude generovat z těchto "formulářů" ...
+</div> -->
+
+{%if current_user %} {% if current_user['level'] > 4%}
+
+
+{#
+<div class="card-deck">
+
+  <div class="card">
+    <div class="card-block">
+      <form>
+        <div class="form-group">
+            <label for="exampleSelect1">Device</label>
+            <select class="form-control" id="exampleSelect1">
+            {% for bus in rospy.get_param('/arom/node/pymlab_node/devices/') %}
+            {% for device in rospy.get_param('/arom/node/pymlab_node/devices/'+bus) %}
+
+                <option>{{bus}}:{{device['name']}} <small>{{device}}</small></option>
+            {% end %}
+            {% end %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="exampleSelect1">Method</label>
+            <input type="text" class="form-control"></input>
+        </div>
+        <div class="form-group">
+            <label for="exampleSelect1">Parameters</label>
+            <input type="text" class="form-control"></input>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  
+  <div class="card">
+    <div class="card-block">
+      <form>
+        <div class="form-group">
+            <label for="exampleSelect1">Device</label>
+            <select class="form-control" id="exampleSelect1">
+            {% for bus in rospy.get_param('/arom/node/pymlab_node/devices/') %}
+            {% for device in rospy.get_param('/arom/node/pymlab_node/devices/'+bus) %}
+
+                <option value="{{device['name']}}">{{bus}}:{{device['name']}} <small>{{device}}</small></option>
+            {% end %}
+            {% end %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="exampleSelect1">Method</label>
+            <input type="text" class="form-control"></input>
+        </div>
+        <div class="form-group">
+            <label for="exampleSelect1">Parameters</label>
+            <input type="text" class="form-control"></input>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  
+  <div class="card">
+    <div class="card-block">
+      <form>
+        <div class="form-group">
+            <label for="exampleSelect1">Device</label>
+            <select class="form-control" id="exampleSelect1">
+            {% for bus in rospy.get_param('/arom/node/pymlab_node/devices/') %}
+            {% for device in rospy.get_param('/arom/node/pymlab_node/devices/'+bus) %}
+
+                <option>{{bus}}:{{device['name']}} <small>{{device}}</small></option>
+            {% end %}
+            {% end %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="exampleSelect1">Method</label>
+            <input type="text" class="form-control"></input>
+        </div>
+        <div class="form-group">
+            <label for="exampleSelect1">Parameters</label>
+            <input type="text" class="form-control"></input>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+    <button class="btn btn-danger" id="btn-addNewDevice">Add new device</button>#}
+
+    <div class="form-group row">
+        <label for="json_whole" class="col-2 col-form-label">Whole schema</label> 
+        <div class="col-12"> <textarea id="json_whole" class="form-control" rows=50>{{open(FeatureParams['cfg'], 'r').read()}}</textarea>
+    </div></div>
+
+
+
+    <div class="input-group">
+        <div class="input-group-btn">
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button id="btn-save" type="button" class="btn btn-success">Save changes</button>
+            </div>
+        </div>
+        <div class="input-group-btn">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Existující nastavení
+            </button>
+            <div class="dropdown-menu">
+                {% for file in glob.glob("/home/odroid/robozor/station/aws_presets/*.json")%}
+                    <a class="dropdown-item" id="{{file}}.json" onclick="LoadNewConfig('{{file}}')"> {{file}} </a>
+                {% end %}
+            </div>
+        </div>
+        <input type="text" class="form-control" id="config_location" value="{{FeatureParams['cfg']}}">
+    </div>
+    {% end %}{% end %}
+
+
+    <div class="form-group row">
+        <label for="json_whole" class="col-2 col-form-label">Real data</label> 
+        <div class="col-12"> <textarea id="json_data" class="form-control" rows=100 disabled=""></textarea>
+    </div></div>
+
+
+
+<script type="text/javascript">
+
+    $('#btn-addNewDevice').on('click', function(){
+        console.log("btn")
+    });
+
+
+    $('#btn-export').on('click', function() {
+        var hierarchy = $('#chart-container').orgchart('getHierarchy', "param");
+        document.getElementById("json_whole").value = JSON.stringify(hierarchy, null, 4);
+    });
+
+
+    $('#btn-save').on('click', function(){
+        console.log("zmáčknuto btn save");
+        $.ajax({
+            type: 'PUT',
+            dataType: 'json',
+            url: "/api/upload/"+document.getElementById("config_location").value,
+            headers: {"X-HTTP-Method-Override": "PUT"},
+            data: document.getElementById("json_whole").value
+        });
+    });
+
+
+    var awsOutput = new ROSLIB.Topic({
+      ros : ros,
+      name : '/arom/node/aws',
+      messageType : 'std_msgs/String'
+    });
+
+    awsOutput.subscribe(function(msg) {
+        document.getElementById("json_data").value = JSON.stringify(JSON.parse(msg.data), undefined, 4);
+    });
+        
+
+</script>

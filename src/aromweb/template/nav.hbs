@@ -1,12 +1,106 @@
 <div id="sidebar-wrapper">
-	<ul class="sidebar-nav">
-		{%for navItem in navItems%}
-			<li><a href="/node/{{navItem[1:]}}">{{navItem[1:]}}</a></li>
-		{%end%}
-		<li></li>
-		<hr>
-		<li><a style="color: #444;" data-toggle="modal" data-target="#exampleModal">Nastavení</a></li>
-		<li><a href="/login" style="color: #444;">Přihlášení</a></li>
-	</ul>
+    <ul class="sidebar-nav">
+        <li><a style="color: #888;" href="/">Home</a></li>
+        <hr>
+        {%for navItem in sorted(navItems)%}
+            <li><a href="/node/{{navItem[1:]}}">{{navItem[1:]}}</a></li>
+        {%end%}
+        <li></li>
+        <hr>
+        <li><a style="color: #888;" data-toggle="modal" data-target="#modal-aboute">Aboute AROM</a></li>
+        {% if current_user %}
+            {% if current_user['level'] > 4%}
+            <li><a style="color: #888;" data-toggle="modal" data-target="#modal-setting">Nastavení</a></li>
+            {% end %}
+
+            <li><a style="color: #888;" href="/logout">Odhlásit se: <b>{{current_user['login']}}</b></a></li>
+        {% else %}
+            <li><a style="color: #777;" data-toggle="modal" data-target="#modal-login">Přihlášení</a></li>
+        {% end %}
+        <li>{{current_user}}</li>
+    </ul>
 
 </div>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal-aboute" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Aboute this system</h5>
+            </div>
+            <div class="modal-body">
+
+            This system belongs to ROBOZOR, network of robotic observatories. This web page is user interface of AROM (<b>A</b>utonomous <b>r</b>obotic <b>o</b>bservatory <b>m</b>anager)
+
+            <ul>
+                <li>Website: <a href="http://wiki.mlab.cz/doku.php?id=cs:robozor">wiki.mlab.cz</a></li>
+                <li>Source Code: <a href="https://github.com/Robozor-network">github.com</a></li>
+            </ul>
+
+            <h3>How to use this web interface</h3>
+            <p></p>
+
+            <p></p>
+
+            <h3>License</h3>
+            <p></p>
+  
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="modal-setting" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            {% include modal_setting.hbs %}
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modal-login" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Setting</h5>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <form action="/login" method="POST">
+                        <div class="form-group">
+                            <label for="username">Login:</label>
+                            <input type="text" class="form-control" id="username" name="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="pwd">Password:</label>
+                            <input type="password" class="form-control" id="password" name="password">
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" disabled=""> Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-default" id='login_user'>Submit</button>
+                        <button class="btn btn-default" id='login_guest'>Guest</button>
+                    {% raw xsrf_form_html() %}
+                    </form>
+                    
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $("#login_user").on('click', function(){
+
+
+    });
+
+
+</script>

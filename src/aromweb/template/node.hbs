@@ -1,11 +1,12 @@
 {% extends "base.hbs" %}
 {% block head %}
 
-<script type="text/javascript" type="text/javascript">
+<script type="text/javascript">
  
   // Connecting to ROS
   // -----------------
-
+  //$.cookie("rosbridge_url", "ws://"+document.location.host+"/ws");
+  //document.cookie = "rosbridge_url="+"ws://"+document.location.host+"/ws"
   if ($.cookie("rosbridge_url") == undefined){
       $.cookie("rosbridge_url", "ws://"+document.location.host+"/ws");
   }
@@ -42,7 +43,7 @@
 
         Lobibox.notify('default', {
             pauseDelayOnHover: true,
-            continueDelayOnInactiveTab: false,
+            continueDelayOnInactiveTab: true,
             msg: msg.msg,
             title: msg.name
         })
@@ -55,6 +56,9 @@
 {% end %}
 
 {% block content %}
+<div class="alert alert-danger" role="alert">
+!!!! Pro zobrazení všech nastavení se přihlašte jako username: <b>'admin'</b>, pass: <b>'admin'</b>
+</div>
 <div class="alert alert-success" role="alert">
 
 	{{NodeParams}}
@@ -68,9 +72,11 @@
 
 {% for feature in NodeParams['feature'] %}
 <div>
-
-{% module NodeFeature(feature, NodeParams['feature'][feature]) %}
-
+{% try %}
+  {% module NodeFeature(feature, NodeParams['feature'][feature]) %}
+{% except %}
+  ERR
+{% end %}
 
 </div>
 {%end%}
