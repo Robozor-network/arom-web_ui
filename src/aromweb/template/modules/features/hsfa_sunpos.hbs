@@ -1,0 +1,30 @@
+aa
+<script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+
+<script type="text/javascript" src="/static/mjpegcanvasjs/build/mjpegcanvas.min.js"></script>
+
+
+
+
+
+<dir>
+  <div id="mjpeg"></div>
+</dir>
+
+
+
+
+
+<script type="text/javascript">
+
+ var viewer = new MJPEGCANVAS.MultiStreamViewer({
+      divID : 'mjpeg',
+      host : 'localhost',
+      width : 1000,
+      height : 500,
+      topics : [ 'image_topic', '/image_topic2'],
+      labels : [ 'cam1', 'cam2']
+    });
+
+
+</script>

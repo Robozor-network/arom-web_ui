@@ -55,9 +55,9 @@ class WebApp(tornado.web.Application):
         settings = dict(
             cookie_secret="necovelmimocanejvictajnyretezeckterynikdoneuhadneatrebaijednocisla1",
             #template_path=os.path.join(self._base_dir, "template"),
-            template_path= "/home/odroid/repos/arom-web_ui/src/aromweb/template/",
+            template_path= "/home/roman/repos/arom-web_ui/src/aromweb/template/",
             #static_path=os.path.join(self._base_dir, "static"),
-            static_path= "/home/odroid/repos/arom-web_ui/src/aromweb/static/",
+            static_path= "/home/roman/repos/arom-web_ui/src/aromweb/static/",
             xsrf_cookies=False,
             name=name,
             server_url=server_url,

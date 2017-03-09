@@ -10,3 +10,6 @@
 [submodule "src/aromweb/static/js9"]
 	path = src/aromweb/static/js9
 	url = git@github.com:ericmandel/js9.git
+[submodule "src/aromweb/static/mjpegcanvasjs"]
+	path = src/aromweb/static/mjpegcanvasjs
+	url = git@github.com:Robozor-network/mjpegcanvasjs.git
