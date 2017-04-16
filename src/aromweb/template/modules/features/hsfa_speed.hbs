@@ -1,0 +1,26 @@
+<input type="number" name="timer" min = 0 max = 9999 id="tracking_speed" value=100>
+<button id="tracking_write" onclick="SetTracking()"> Set </button>
+<script type="text/javascript">
+	
+tracking = new ROSLIB.Param({
+     ros : ros,
+     name : '/coelostat/speeds/tracking'
+});
+
+
+
+tracking.get(function(value) {
+	console.log('MAX VAL: ' + value);
+	if (value >= 0) {
+		document.getElementById('tracking_speed').value = value;
+	}else{
+		document.getElementById('tracking_speed').value = 100;
+	}
+});
+
+function SetTracking(){
+	tracking.set(document.getElementById('tracking_speed').value)
+}
+
+
+</script>

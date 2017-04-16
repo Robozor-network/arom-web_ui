@@ -18,7 +18,7 @@ class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
 
         user_json = self.get_secure_cookie("user")
-        with open('/home/roman/robozor/users.json') as data_file:    
+        with open('/home/odroid/robozor/users.json') as data_file:    
             users = json.load(data_file)
 
         if user_json:
@@ -84,7 +84,7 @@ class LoginHandler(BaseHandler):
         username = self.get_argument("username", "")
         password = self.get_argument("password", "")
 
-        with open('/home/roman/robozor/users.json') as data_file:    
+        with open('/home/odroid/robozor/users.json') as data_file:    
             users = json.load(data_file)
 
         print username

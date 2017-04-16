@@ -1,0 +1,35 @@
+
+
+
+<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+<div class="card">
+    <div class="card-header primary-color white-text">{{FeatureParams['name']}}</div>
+    <div class="card-block" id='raw_{{FeatureParams["id"]}}'> 
+
+	</div>
+	<div class="card-footer text-muted">
+		<small>{{FeatureParams}}</small>
+	</div>
+</div>
+</div>
+
+
+<script type="text/javascript">
+	
+
+	var motor_status_{{FeatureParams['id']}} = new ROSLIB.Topic({
+      ros : ros,
+      name : '{{FeatureParams["toppic"]}}',
+      messageType : 'std_msgs/String'
+    });
+
+    motor_status_{{FeatureParams['id']}}.subscribe(function(msg) {
+        var json = JSON.parse(msg.data)
+
+        console.log(json)
+        document.getElementById('raw_{{FeatureParams['id']}}').innerHTML = "<pre>" + JSON.stringify(json, null, 4) + "</pre>"
+        //$('#raw_{{FeatureParams['id']}}').replaceAll("<pre>" + JSON.stringify(json, null, 4) + "</pre>");
+    });
+
+
+</script>
