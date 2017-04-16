@@ -1,9 +1,56 @@
-<div class="col-sm-4">
+
+<script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script type="text/javascript" src="/static/mjpegcanvasjs/build/mjpegcanvas.min.js"></script>
+
+<div class="col-sm-12">
+    <div class="card">
+        <h3 class="card-header">Camera preview</h3>
+        <div class="card-block" id="mjpeg_containter" style="padding: 0px;">
+            <dir>
+              <div id="mjpeg"></div>
+            </dir>
+        </div>
+    </div>
+</div>
+
+<div class="col-sm-6">
     <div class="card">
         <h3 class="card-header">Camera controll</h3>
         <div class="card-block">
+            {% for config in sorted(FeatureParams['config'])%}
+                <div class="form-group">
+                    <label>{{config}}</label>
+                    {% set choices = FeatureParams['config'][config]['choices']%}
+                    {% if len(choices) > 0%}
+                    <div class="input-group">
+                        <select class="custom-select form-control" id="select_{{config}}">
+                            {% try %}
+                                {%for option in choices%}
+                                    <option id="{{option}}" {% if option == FeatureParams['config'][config]['value']%}selected{%end%}>{{option}}</option>
+                                {% end %}
+                            {% except %} Error {%end%}
+                        </select>
+                        <span class="input-group-btn">
+                                <button class="btn btn-secondary SetNewConfig" type="button" id="{{config}}" ><i class="fa fa-upload" aria-hidden="true" distabled></i></button>
+                        </span>
+                    </div>
+                    {% else %}
+                        <input type="text" value="{{FeatureParams['config'][config]['value']}}" class="form-control" disabled>
+                    {%end%}
+                </div>
+            {% end %}
+
+        </div>
+    </div>
+</div>
 
 
+<div class="col-sm-6">
+    <div class="card">
+        <h3 class="card-header">Camera</h3>
+        <div class="card-block">
+
+        {#
             <div class="form-group">
                 <label for="gain">Gain</label>
                 <div class="input-group">
@@ -22,7 +69,7 @@
                         <button class="btn btn-secondary" type="button" id="btn_exposure" ><i class="fa fa-upload" aria-hidden="true"></i></button>
                     </span>
                 </div>
-            </div>
+            </div>#}
 
             <div class="form-group">
                 <button class="btn btn-secondary" type="button" id="btn_capture" style="width: 100%;">Capture</button>
@@ -37,6 +84,7 @@
     </div>
 </div>
 
+
 <script type="text/javascript">
 
 
@@ -47,7 +95,26 @@ var sendCtrl = new ROSLIB.Topic({
 });
 
 
+var sendConfig = new ROSLIB.Topic({
+    ros : ros,
+    name : '/arom/camera/config',
+    messageType : 'arom/CameraParam'
+});
 
+
+
+$('.SetNewConfig').on('click', function() {
+    //alert("aaa");
+    select = document.getElementById("select_"+this.id)
+    console.log(select.options[select.selectedIndex].value);
+
+    var msg = new ROSLIB.Message({
+        param: String(this.id),
+        value: String(select.options[select.selectedIndex].value)
+        //value: String(select.selectedIndex)
+    });
+    sendConfig.publish(msg);
+});
     
 
 $('#btn_exposure').on('click', function() {
@@ -97,6 +164,14 @@ $('#chb_loop').on('click', function() {
 });
 
 
+
+ var viewer = new MJPEGCANVAS.Viewer({
+      divID : 'mjpeg',
+      host : window.location.hostname,
+      width : document.getElementById("mjpeg_containter").offsetWidth,
+      height : document.getElementById("mjpeg_containter").offsetWidth/16*9,
+      topic : '/arom/camera/image',
+    });
 
 
 </script>
