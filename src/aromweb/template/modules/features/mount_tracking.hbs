@@ -33,7 +33,7 @@
 </div>
 
 <script type="text/javascript">
-  
+
     function setTracking(mode) {
 
       var sendCtrl = new ROSLIB.Topic({
@@ -57,10 +57,6 @@
               var msg = new ROSLIB.Message({
                 data: 'spd 0 0'
               });
-              $("#AxA").val(0);
-              $("#AxB").val(0);
-              $("#AxA_range").val(0);
-              $("#AxB_range").val(0);
               break;
       }
 

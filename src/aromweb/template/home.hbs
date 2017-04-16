@@ -8,4 +8,27 @@
   </div>
 </div>
 
+{% import psutil %}
+
+<h2>System info</h2>
+<hr>
+
+CPU percent {{psutil.cpu_percent(interval=1, percpu=True)}} <br>
+<hr>
+VirtualMem {{psutil.virtual_memory().percent}}% <br>
+<hr>
+SwapMem {{psutil.swap_memory().percent}}% <br>
+<hr>
+{% for net in psutil.net_io_counters(pernic=True) %}
+Net {{net}}: <small>{{psutil.net_io_counters(pernic=True)[net]}}</small> <br>
+{% end %}
+
+<hr>
+{% for disc in psutil.disk_io_counters(perdisk=True) %}
+Disc 	{{disc}}: <small> {{psutil.disk_io_counters(perdisk=True)[disc]}}</small><br>
+{% end %}
+<hr>
+boottime {{datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S')}}<br>
+
+
 {% end %}
