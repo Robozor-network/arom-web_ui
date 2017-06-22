@@ -74,7 +74,13 @@
 {% for feature in NodeParams['feature'] %}
 <div>
 {% try %}
-  {% module NodeFeature(feature, NodeParams['feature'][feature]) %}
+  {% if "__" in feature%}
+    {% set node_param = NodeParams['feature'][feature]['id'] = feature.split('__')[1] %}
+    {% module NodeFeature(feature, NodeParams['feature'][feature]) %}
+  {% else %}
+    {% set node_param = NodeParams['feature'][feature]['id'] = 0 %}
+    {% module NodeFeature(feature, NodeParams['feature'][feature]) %}
+  {% end %}
 {% except %}
   ERR
 {% end %}
