@@ -7,7 +7,7 @@ import tornado.web
 import glob
 import json
 import io
-import os
+import os, sys
 import subprocess
 
 
@@ -17,8 +17,14 @@ import md5
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
 
+        user_file = '/home/odroid/robozor/users.json'
+
+        #if not os.path.exists(user_file):
+        #    print "Missing user.json (%s)" %(user_file)
+        #    sys.exit()
+
         user_json = self.get_secure_cookie("user")
-        with open('/home/odroid/robozor/users.json') as data_file:    
+        with open(user_file) as data_file:    
             users = json.load(data_file)
 
         if user_json:

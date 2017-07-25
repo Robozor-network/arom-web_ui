@@ -3,4 +3,4 @@ Web interface for AROM software
 
 
 ## Dependencies
-AROM dependencies and: `sudo apt install python-tornado`
+AROM dependencies and: `sudo apt install python-tornado python-psutil`

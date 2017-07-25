@@ -20,7 +20,17 @@ class NavBar(tornado.web.UIModule):
 class NodeFeature(tornado.web.UIModule):
     def render(self, node, *args, **kwds):
         #return globals()[node](self, *args, **kwds).value()
-        return self.render_string("modules/features/%s.hbs"%(node.split("__")[0]), FeatureParams = args[0])
+        print args
+        try:
+            print "node name>>", node.split("__")[0]
+            if 'external' == node.split("__")[0]:
+                return self.render_string(args[0]['feature'], FeatureParams = args[0])
+            else:
+                return self.render_string("modules/features/%s.hbs"%(node.split("__")[0]), FeatureParams = args[0])
+                pass
+        except Exception as e:
+            print e
+            return self.write( e )
 
 ########################################################################################
 ##
