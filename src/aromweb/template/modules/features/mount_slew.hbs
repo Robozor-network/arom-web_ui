@@ -66,8 +66,12 @@
         <button type="button" class="btn" onclick="slew('home')">home</button>
     </div>
     <div class="card-footer text-muted">
+      <b>Sky:</b><br>
         ra: <span id='actual_ra'><b>-----</b></span>&deg;<br>
-        dec: <span id='actual_dec'><b>-----</b></span>&deg;
+        dec: <span id='actual_dec'><b>-----</b></span>&deg;<br>
+      <b>Mount:</b><br>
+        ra: <span id='actual_ra_mount'><b>-----</b></span>&deg;<br>
+        dec: <span id='actual_dec_mount'><b>-----</b></span>&deg;
     </div>
 </div>
 </div>
@@ -115,22 +119,36 @@
       delete msg;
     }
   
-    var rcvDisplay = new ROSLIB.Topic({
+    var radec_sky = new ROSLIB.Topic({
       ros : ros,
       name : '/mount/status/coordinates/RaDec',
       messageType : 'std_msgs/Float32MultiArray'
     });
 
-    rcvDisplay.subscribe(function(msg) {
+    radec_sky.subscribe(function(msg) {
       console.log(msg);
       document.getElementById('actual_ra').innerHTML = msg.data[0];
       document.getElementById('actual_dec').innerHTML = msg.data[1];
     });
 
+    var radec_mount = new ROSLIB.Topic({
+      ros : ros,
+      name : '/mount/status/coordinates/RaDec_mount',
+      messageType : 'std_msgs/Float32MultiArray'
+    });
+
+    radec_mount.subscribe(function(msg) {
+      console.log(msg);
+      document.getElementById('actual_ra_mount').innerHTML = msg.data[0];
+      document.getElementById('actual_dec_mount').innerHTML = msg.data[1];
+    });
+
     window.onbeforeunload = function(){
       console.log("closing");
-      console.log(rcvDisplay.unsubscribe());
-      delete rcvDisplay;
+      console.log(radec_sky.unsubscribe());
+      delete radec_sky;
+      console.log(radec_mount.unsubscribe());
+      delete radec_mount;
     };
 
 </script>
@@ -152,19 +170,47 @@
             <form>
               <div class="form-group row">
                 <label for="axA">Right ascension</label>
-                <input class="form-control" type="number" value="0" id="axA_ra">
+                <input class="form-control" type="number" value="0" step="0.0001" id="offset_ra">
               </div>
 
               <div class="form-group row">
                 <label for="axB">Declination</label>
-                <input class="form-control" type="number" value="0" id="axB_dec">
+                <input class="form-control" type="number" value="0" step="0.0001" id="offset_dec">
               </div>
 
               
             </form>
 
-        <button type="button" class="btn btn-success" onclick="setOffset('radec')">Set</button>
+        <button type="button" class="btn btn-success" onclick="setOffset()">Set</button>
         <button type="button" class="btn" onclick="setOffset('earse')">Earse</button>
 
 </div>
 </div>
+
+<script type="text/javascript">
+    
+    var sendOffset = new ROSLIB.Topic({
+      ros : ros,
+      name : '/mount/set/offset2',
+      messageType : 'std_msgs/String',
+    });
+
+  
+    function setOffset() {
+      var msg = new ROSLIB.Message({
+        data: document.getElementById("offset_ra").value+";"+document.getElementById("offset_dec").value+";"
+      });
+      
+      console.log("posilam zpravu o zmene offsetu")
+      console.log(msg)
+      sendOffset.publish(msg);
+    }
+
+    //sendOffset.subscribe(function(msg) {
+    //  console.log(msg);
+    //  document.getElementById('actual_ra').innerHTML = msg.data[0];
+    //  document.getElementById('actual_dec').innerHTML = msg.data[1];
+    //});
+
+
+</script>

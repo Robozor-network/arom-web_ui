@@ -57,19 +57,6 @@
 {% end %}
 
 {% block content %}
-<div class="alert alert-danger" role="alert">
-!!!! Pro zobrazení všech nastavení se přihlašte jako username: <b>'admin'</b>, pass: <b>'admin'</b>
-</div>
-<div class="alert alert-success" role="alert" style="max-height: 30em; overflow: auto;">
-
-	{{NodeParams}}
-
-	<ul>
-	{% for feature in NodeParams['feature'] %}
-	<li>{{feature}} >> {{NodeParams['feature'][feature]}}</li>
-	{%end%}
-	</ul>
-</div>
 
 {% for feature in NodeParams['feature'] %}
 <div>
@@ -82,11 +69,23 @@
     {% module NodeFeature(feature, NodeParams['feature'][feature]) %}
   {% end %}
 {% except %}
-  ERR
+  ERR {{feature}}
 {% end %}
 
 </div>
 {%end%}
+
+<hr>
+<div class="alert alert-success" role="alert" style="overflow: auto;">
+  {{NodeParams}}
+
+  <ul>
+  {% for feature in NodeParams['feature'] %}
+  <li>{{feature}} >> {{NodeParams['feature'][feature]}}</li>
+  {%end%}
+  </ul>
+</div>
+
 
 
 

@@ -13,9 +13,9 @@
     </div>
 </div>
 
-<div class="col-sm-6">
+<div class="col-sm-12 col-md-6 ">
     <div class="card">
-        <h3 class="card-header">Camera controll</h3>
+        <h3 class="card-header">Camera control</h3>
         <div class="card-block">
             {% for config in sorted(FeatureParams['config'])%}
                 <div class="form-group">
@@ -50,7 +50,7 @@
         <h3 class="card-header">Camera</h3>
         <div class="card-block">
 
-        {#
+            {#
             <div class="form-group">
                 <label for="gain">Gain</label>
                 <div class="input-group">
@@ -76,12 +76,17 @@
             </div>
 
             <div class="form-group">
-              <input type="checkbox" name="loop" id="chb_loop" checked> Loop
+              <input type="checkbox" name="loop" id="chb_loop"> Loop
+            </div>
+
+            <div class="form-group">
+              <input type="checkbox" name="loopcapture" id="chb_capturing"> Loop capture
             </div>
 
 
         </div>
     </div>
+</div>
 </div>
 
 
@@ -100,7 +105,6 @@ var sendConfig = new ROSLIB.Topic({
     name : '/arom/camera/config',
     messageType : 'arom/CameraParam'
 });
-
 
 
 $('.SetNewConfig').on('click', function() {
@@ -163,6 +167,24 @@ $('#chb_loop').on('click', function() {
 
 });
 
+$('#chb_capturing').on('click', function() {
+    console.log("function, change thread capturing");
+    if (document.getElementById('chb_capturing').checked) 
+        {
+            var msg = new ROSLIB.Message({
+                data: 'startCapture'
+            });
+            sendCtrl.publish(msg);
+
+        }else{
+            var msg = new ROSLIB.Message({
+                data: 'stopCapture'
+            });
+            sendCtrl.publish(msg);
+
+        }
+
+});
 
 
  var viewer = new MJPEGCANVAS.Viewer({
