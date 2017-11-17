@@ -22,8 +22,14 @@ SwapMem {{psutil.swap_memory().percent}}% <br>
 {% for net in psutil.net_io_counters(pernic=True) %}
 Net {{net}}: <small>{{psutil.net_io_counters(pernic=True)[net]}}</small> <br>
 {% end %}
-
 <hr>
+
+
+{% for net in psutil.net_if_addrs() %}
+Net {{net}}  ({% for a in psutil.net_if_addrs()[net] %}{{a.address}}, {%end%})<br>
+{% end %}
+<hr>
+
 {% for disc in psutil.disk_io_counters(perdisk=True) %}
 Disc 	{{disc}}: <small> {{psutil.disk_io_counters(perdisk=True)[disc]}}</small><br>
 {% end %}

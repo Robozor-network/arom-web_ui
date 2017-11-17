@@ -51,7 +51,15 @@ class NodeStart(BaseHandler):
         else:
             return self.write("UserErr")
 
-
+def PowerOff(BaseHandler):
+    def get(self, name=None):
+        if self.current_user:
+            cmd = ['poweroff']
+            r = subprocess.Popen(cmd)
+            return self.write(" - ".join(cmd))
+        else:
+            return self.write("UserErr, zkuste se prihlasit")
+        
 
 class NodeKill(BaseHandler):
     def get(self, node):
