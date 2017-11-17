@@ -51,7 +51,7 @@ class NodeStart(BaseHandler):
         else:
             return self.write("UserErr")
 
-def PowerOff(BaseHandler):
+class PowerOff(BaseHandler):
     def get(self, name=None):
         if self.current_user:
             cmd = ['poweroff']
