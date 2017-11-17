@@ -48,6 +48,7 @@ class WebApp(tornado.web.Application):
             (r"/api/getImage/(.*)", base.GetImage),
             (r"/api/node/kill/(.*)", base.NodeKill),
             (r"/api/node/start/(.*)", base.NodeStart),
+            (r"/poweroff/", base.PowerOff),
             #(r"/rosapi/(.*)", rosHandlers.NodeHandler),
             #(r"/ws/(.*)", websockets.PanWebSocket),
         ]
