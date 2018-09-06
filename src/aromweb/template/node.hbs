@@ -1,59 +1,7 @@
 {% extends "base.hbs" %}
 {% block head %}
 
-<script type="text/javascript">
- 
-  // Connecting to ROS
-  // -----------------
-  //$.cookie("rosbridge_url", "ws://"+document.location.host+"/ws");
-  //document.cookie = "rosbridge_url="+"ws://"+document.location.host+"/ws"
-  if ($.cookie("rosbridge_url") == undefined){
-      $.cookie("rosbridge_url", "ws://"+document.location.host+"/ws");
-  }
 
-  var ros = new ROSLIB.Ros({
-    url : $.cookie("rosbridge_url")
-  });
-
-  ros.on('connection', function() {
-    console.log('Connected to websocket server.');
-  });
-
-  ros.on('error', function(error) {
-    $('#myModal').modal('show');
-    console.log('Error connecting to websocket server: ', error);
-  });
-
-  ros.on('close', function() {
-    jQuery('#modal').modal('show');
-    console.log('Connection to websocket server closed.');
-    alert('Connection to websocket server closed.');
-  });
-
-
-    var rosTopic = new ROSLIB.Topic({
-      ros : ros,
-      name : '/rosout',
-      messageType : 'rosgraph_msgs/Log'
-    });
-
-
-    rosTopic.subscribe(function(msg) {
-      if (false){
-      //if (msg.level > 3){
-
-        Lobibox.notify('default', {
-            pauseDelayOnHover: true,
-            continueDelayOnInactiveTab: true,
-            msg: msg.msg,
-            title: msg.name
-        })
-      }
-    });
-
-
-
-</script>
 {% end %}
 
 {% block content %}

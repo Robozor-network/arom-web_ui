@@ -21,6 +21,7 @@ import tornado.speedups
 from handler import base
 from handler import rosHandlers
 from modules import modules
+from node_handlers import pymlab_handler
 #from handler import websockets
 #from ui import modules
 
@@ -40,6 +41,7 @@ class WebApp(tornado.web.Application):
 
         handlers = [
             (r"/", base.MainHandler),
+            (r"/node/pymlab_node", pymlab_handler.pymlabBase),
             (r"/node/(.*)", base.NodeHandler),
             (r"/rosapi/publist/(.*)", rosHandlers.publish),
             (r"/login", base.LoginHandler),

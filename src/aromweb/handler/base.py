@@ -12,7 +12,7 @@ import subprocess
 
 
 import rosparam
-import md5
+import hashlib
 
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
@@ -42,8 +42,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class NodeStart(BaseHandler):
     def get(self, node):
-        print "START", "test"
-        print node
+        print(node)
         if self.current_user:
             cmd = ['rosrun', 'arom', node, '&']
             r = subprocess.Popen(cmd)
@@ -63,8 +62,7 @@ class PowerOff(BaseHandler):
 
 class NodeKill(BaseHandler):
     def get(self, node):
-        print "KILL"
-        print node
+        print("KILL",  node)
         if self.current_user:
             cmd = ['rosnode', 'kill', '/'+node]
             r = subprocess.call(cmd)
@@ -74,10 +72,10 @@ class NodeKill(BaseHandler):
 
 class GetImage(BaseHandler):
     def get(self, node):
-        print "GetImage"
+        print("GetImage")
         image_loc = self.get_argument("image", None)
         if image_loc:
-            print image_loc
+            print(image_loc)
             img  = open(image_loc, "r")
             self.set_header ('Content-Type', 'image/jpg')
             #self.set_header ('Content-Disposition', 'attachment; filename='+filename+'')
@@ -90,10 +88,6 @@ class GetImage(BaseHandler):
 
 
 class LoginHandler(BaseHandler):
-
-    #def get(self):
-    #    self.render("login.html", next=self.get_argument("next","/"))
-
     def post(self):
         username = self.get_argument("username", "")
         password = self.get_argument("password", "")
@@ -101,13 +95,13 @@ class LoginHandler(BaseHandler):
         with open('/home/odroid/robozor/users.json') as data_file:    
             users = json.load(data_file)
 
-        print username
-        print users
+        print(username)
+        print(users)
 
         if username in users:
-            print "tento uzivatel existuje"
-            print users[username]
-            if users[username]['pass'] == md5.new(password).hexdigest():
+            print("tento uzivatel existuje")
+            print(users[username])
+            if users[username]['pass'] == hashlib.md5(password).hexdigest():
                 self.set_current_user(username)
                 self.redirect(self.get_argument("next", u"/"))
             else:
@@ -116,8 +110,6 @@ class LoginHandler(BaseHandler):
         else:
             self.clear_cookie("user")
             self.redirect("/")
-            #error_msg = u"?error=" + tornado.escape.url_escape("Login incorrect.")
-            #self.redirect(u"/login" + error_msg)
 
     def set_current_user(self, user):
         if user:
@@ -125,22 +117,26 @@ class LoginHandler(BaseHandler):
         else:
             self.clear_cookie("user")
 
+
+
 class LogoutHandler(BaseHandler):
 
     def get(self):
         self.clear_cookie("user")
         self.redirect(u"/")
 
+
+
 class NodeHandler(BaseHandler):
     def get(self, node):
-        print self.current_user
+        print(self.current_user)
         user_data = self.get_current_user()
 
         if self.current_user:
             try:
                 params = rosparam.get_param("/arom/node/"+node)
                 self.render("../template/node.hbs", user_data=user_data, NavItems=[], NodeParams = params, FeatureParams = None)
-            except Exception, e:
+            except Exception as e:
                 self.render("../template/nonode.hbs", user_data=user_data, NavItems=[], NodeParams = None, FeatureParams = None)
         else:
                 self.render("../template/loggedout.hbs")
@@ -160,8 +156,8 @@ class WebApi(BaseHandler):
 class WebUpload(BaseHandler):
     def put(self, node):
         data = json.loads(self.request.body)
-        print json.dumps(data, indent=4, sort_keys=False)
-        print "test", '/'+node
+        print(json.dumps(data, indent=4, sort_keys=False))
+        print("test", '/'+node)
 
         with io.open('/'+node, 'w', encoding='utf-8') as f:
             f.write(unicode(json.dumps(data, indent=4, sort_keys=False, ensure_ascii=False)))

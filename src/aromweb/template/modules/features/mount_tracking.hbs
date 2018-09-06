@@ -1,5 +1,5 @@
 
-<div class="col-xs-12 col-sm-6 col-md-5 col-lg-5 col-xl-4">
+<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 col-xl-5">
 <div class="card">
     <div class="card-header primary-color white-text">
         Mount tracking<br> 
@@ -9,24 +9,31 @@
         <div class="tab-content">
             
               <div class="form-group row">
-                <label for="axA">Ra</label>
-                <input class="form-control" type="number" value="1.7" min="-500" max="500" id="AxA">
-                <input class="form-control" type="range" value="1.7" min="-500" max="500" step="0.001" id="AxA_range">
+                <label for="axB">Ra</label>
+                <input class="form-control" type="number" value="1.7" min="-500" max="500" id="AxB">
+                <input class="form-control" type="range" value="1.7" min="-500" max="500" step="0.001" id="AxB_range">
               </div>
 
               <div class="form-group row">
-                <label for="axB">Dec</label>
-                <input class="form-control" type="number" value="0" min="-500" max="500" id="AxB">
-                <input class="form-control" type="range" value="0" min="-500" max="500" step="0.001" id="AxB_range">
+                <label for="AxA">Dec</label>
+                <input class="form-control" type="number" value="0" min="-500" max="500" id="AxA">
+                <input class="form-control" type="range" value="0" min="-500" max="500" step="0.001" id="AxA_range">
               </div>         
 
         </div>
         <hr>
         <div class="btn-group">
-          <button type="button" class="btn btn-primary" onclick="setTracking('spd')">Nastavit</button>
-          <button type="button" class="btn btn-danger" onclick="setTracking('stopTracking')">Stop</button>
+          <button type="button" class="btn btn-primary" onclick="setTrackingOLD('spd')">Nastavit</button>
+          <button type="button" class="btn btn-danger" onclick="setTrackingOLD('stopTracking')">Stop</button>
           <!-- <button type="button" class="btn btn-danger" onclick="setTracking('stopTracking')">Vypnout OoO</button>
           <button type="button" class="btn btn-success" onclick="setTracking('stopTracking')">Výchozí rychlost OoO</button> -->
+        </div><br>
+        <div class="btn-group">
+          <button class="btn btn-sm tracking-highlight tracking-highlight-stop"  onclick="setTracking('stop')">Stop</button>
+          <button class="btn btn-sm tracking-highlight tracking-highlight-sidereal"  onclick="setTracking('sidereal')">Sidereal</button>
+          <button class="btn btn-sm tracking-highlight tracking-highlight-solar"  onclick="setTracking('solar')">Solar</button>
+          <button class="btn btn-sm tracking-highlight tracking-highlight-lunal"  onclick="setTracking('lunar')">Lunar</button>
+          <button class="btn btn-sm tracking-highlight tracking-highlight-custom"  onclick="setTracking('custom')">Custom</button>
         </div>
     </div>
 </div>
@@ -34,7 +41,7 @@
 
 <script type="text/javascript">
 
-    function setTracking(mode) {
+    function setTrackingOLD(mode) {
 
       var sendCtrl = new ROSLIB.Topic({
         ros : ros,
@@ -81,6 +88,70 @@
 
     $("#AxB").keyup(function(){
         $("#AxB_range").val($("#AxB").val());
+    });
+
+
+    function setTracking(mode) {
+      console.log("set_tracikng:", mode);
+
+      var sendCtrl = new ROSLIB.Topic({
+        ros : ros,
+        name : '/mount/tracking_status',
+        messageType : 'arom_telescope/time_machine'
+      }, latch=true);
+
+      switch (mode) {
+          case 'sidereal':
+          case 'lunar':
+          case 'solar':
+          case 'stop':
+              var msg = new ROSLIB.Message({
+                mode: mode
+              });
+              break;
+          case 'custom':
+              var msg = new ROSLIB.Message({
+                mode: 'custom',
+                units: 'steps',
+                ra: $("#AxA").val(),
+                dec: $("#AxB").val()
+              });
+              break;
+      }
+      console.log(msg)
+      sendCtrl.publish(msg);
+
+      delete sendCtrl;
+      delete msg;
+    }
+
+
+    var status_set = new ROSLIB.Topic({
+      ros : ros,
+      name : '/mount/tracking_status',
+      messageType : 'arom_telescope/time_machine'
+    });
+
+    status_set.subscribe(function(msg) {
+        console.log(msg);
+        $('.tracking-highlight').removeClass('btn-success')
+        switch (msg.mode){
+          case 'sidereal':
+            $('.tracking-highlight-sidereal').removeClass('btn-success');
+            break;
+          case 'solar':
+            $('.tracking-highlight-solar').removeClass('btn-success');
+            break;
+          case 'lunar':
+            $('.tracking-highlight-lunal').removeClass('btn-success');
+            break;
+          case 'none':
+            break;
+          case 'custom':
+          default:
+            $('.tracking-highlight-custom').removeClass('btn-success');
+            break;
+        }
     });
   
   

@@ -18,6 +18,6 @@ class publish(tornado.web.RequestHandler):    # /rosapi/publist/(.*)
             data = self.get_argument('data', 'None')
             pub = rospy.Publisher('topic', String, queue_size=10)
             rospy.init_node('web_publisher')
-            print pub, topic, data
+            print(pub, topic, data)
             pub.publish(String(data))
             self.write("ack")

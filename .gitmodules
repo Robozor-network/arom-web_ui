@@ -13,3 +13,6 @@
 [submodule "src/aromweb/static/mjpegcanvasjs"]
 	path = src/aromweb/static/mjpegcanvasjs
 	url = git@github.com:Robozor-network/mjpegcanvasjs.git
+[submodule "src/aromweb/static/jsoneditor"]
+	path = src/aromweb/static/jsoneditor
+	url = git@github.com:josdejong/jsoneditor.git
